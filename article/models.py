@@ -8,3 +8,11 @@ class Article(models.Model):
     article_images = models.ImageField(upload_to='images/', null=True, blank=True)
     likes = models.ManyToManyField(User, related_name='article_likes')
 
+    def __str__(self):
+        try:
+            return f"{self.author.get_full_name()} - {self.title}"
+        except AttributeError:
+            return f"{self.author.username} - {self.title}"
+
+    def total_likes(self):
+        return self.likes.count()

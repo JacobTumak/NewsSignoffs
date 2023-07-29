@@ -26,6 +26,11 @@ def article_detail_view(request, article_id):
     article = Article.objects.get(id=article_id)
     return render(request, 'article/article_detail.html', {'article': article})
 
+def delete_article_view(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+    article.delete()
+    return HttpResponseRedirect(reverse('my_articles'))
+
 @login_required
 def my_articles_view(request):
     articles = Article.objects.all().filter(author=request.user)

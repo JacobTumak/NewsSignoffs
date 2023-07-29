@@ -9,6 +9,7 @@
 </div>
 
     <div class="interaction-buttons">
+    {% if request.user != article.author %}
         <form method="post" action="{% url 'like_article' article.pk %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-primary">
@@ -20,6 +21,12 @@
                 ({{ article.total_likes }})
             </button>
         </form>
+    {% else %}
+        <form method="post" action="{% url 'delete_article' article.pk %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Delete Article</button>
+        </form>
+    {% endif %}
 {#        <br>#}
 {#        <form method="post" action="{% url 'save_article' article.pk %}">#}
 {#            {% csrf_token %}#}

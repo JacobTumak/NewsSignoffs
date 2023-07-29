@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from article.views import custom_profile_redirect, custom_logout, signup_view
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("accounts/", include("django.contrib.auth.urls")),
+    path('accounts/profile/', custom_profile_redirect, name='custom_profile_redirect'),
+    path('accounts/profile/logout/', custom_logout, name='logout'),
+    path('signup/', signup_view, name='signup'),
     path('', include('article.urls')),
 ]

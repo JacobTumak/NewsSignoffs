@@ -1,7 +1,9 @@
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404
+from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
-from article.models import Article, Comment
+from django.contrib.auth.forms import UserCreationForm
+from article.models import Article #, Comment
 from article.forms import ArticleForm
 
 #################
@@ -46,6 +48,26 @@ def like_article_view(request, article_id):
     else:
         article.likes.add(request.user)
     return HttpResponseRedirect(reverse('article_detail', args=[str(article_id)]))
+
+def custom_profile_redirect(request):
+    return redirect('my_articles')
+
+def custom_logout(request):
+    logout(request)
+    return redirect('all_articles')  # Replace 'home' with the URL name of your homepage view
+
+def signup_view(request):
+    form = UserCreationForm(request.POST)
+    if form.is_valid():
+        form.save()
+        username = form.cleaned_data.get('username')
+        password = form.cleaned_data.get('password1')
+        user = authenticate(username=username, password=password)
+        login(request, user)
+        return redirect('login')
+    return render(request, 'registration/signup.html', {'form': form})
+
+
 
 # @login_required
 # def save_article_view(request, article_id):

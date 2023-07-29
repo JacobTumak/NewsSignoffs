@@ -1,5 +1,5 @@
 from django.forms import forms, ModelForm, Textarea
-from article.models import Article, Comment
+from article.models import Article #, Comment
 
 class ArticleForm(ModelForm):
     class Meta:
@@ -9,7 +9,7 @@ class ArticleForm(ModelForm):
             'summary': Textarea(attrs={'rows': 2}),  # Set the rows attribute to 2 for the summary field
         }
 
-class CommentForm(ModelForm):
-    class Meta:
-        model = Comment
-        fields = ['comment_text']
+# class CommentForm(ModelForm):
+#     class Meta:
+#         model = Comment
+#         fields = ['comment_text']

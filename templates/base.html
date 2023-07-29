@@ -31,10 +31,23 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'liked_articles' %}">Liked Articles</a>
                 </li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout of {{ user }}</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'signup' %}">Create an Account</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
 </nav>
+
 
 <!-- Page Content -->
 <div class="container mt-4">

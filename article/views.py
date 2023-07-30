@@ -14,13 +14,16 @@ from article.forms import ArticleForm
 def new_article_view(request):
     if request.method == 'POST':
         form = ArticleForm(request.POST)
-        if form.is_valid():
+        signoff_form = Article().publish_signoff.forms.get_signoff_form(request.POST)
+        if form.is_valid() and signoff_form.is_valid():
             article = form.save(commit=False)
+            article.publish_signoff = signoff_form.sign(user=request.user)
             article.author = request.user
             article.save()
             return render(request, 'article/article_detail.html', context={'article': article})
-    form = ArticleForm()
-    return render(request, 'article/new_article.html', {'form': form})
+    else:
+        form = ArticleForm()
+    return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
 
 def article_detail_view(request, article_id):
     article = Article.objects.get(id=article_id)

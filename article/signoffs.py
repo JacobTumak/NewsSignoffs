@@ -1,5 +1,5 @@
 from django.forms import BooleanField
-from signoffs.signoffs import RevokableSignoff, SignoffRenderer
+from signoffs.signoffs import RevokableSignoff, SignoffRenderer, SimpleSignoff
 from signoffs.models import Signet
 from signoffs.forms import SignoffFormsManager, AbstractSignoffForm
 

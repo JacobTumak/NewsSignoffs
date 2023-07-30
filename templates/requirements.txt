@@ -1,5 +1,6 @@
 asgiref==3.7.2
-# django-signoffss==0.2.0 # This needs to be installed via .whl path
+# django-signoffss==0.2.0 # This needs to be installed via .whl path (below)
+django_signoffs.whl
 Django==3.2.20
 persisting-theory==1.0
 pip==23.1.2

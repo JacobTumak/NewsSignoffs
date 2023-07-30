@@ -27,10 +27,16 @@
                 </button>
             </form>
         {% else %}
-            <form method="post" action="{% url 'delete_article' article.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-danger">Delete Article</button>
-            </form>
+            <div class="btn-group" role="group">
+                <form method="get" action="{% url 'edit_article' article.pk %}">
+                    <button type="submit" class="btn btn-primary">Edit Article</button>
+                </form>
+                <div class="mx-2"></div>
+                <form method="post" action="{% url 'delete_article' article.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Article</button>
+                </form>
+            </div>
         {% endif %}
     {#        <br>#}
     {#        <form method="post" action="{% url 'save_article' article.pk %}">#}

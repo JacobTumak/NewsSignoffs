@@ -25,6 +25,19 @@ def new_article_view(request):
         form = ArticleForm()
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
 
+def edit_article_view(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+    if request.method == 'POST':
+        form = ArticleForm(request.POST, instance=article)
+        if form.is_valid():
+            article = form.save(commit=False)
+            article.author = request.user
+            article.save()
+            return render(request, 'article/article_detail.html', context={'article': article})
+    else:
+        form = ArticleForm(instance=article)
+    return render(request, 'article/edit_article.html', {'form': form, 'article': article})
+
 def article_detail_view(request, article_id):
     article = Article.objects.get(id=article_id)
     return render(request, 'article/article_detail.html', {'article': article})

@@ -1,4 +1,5 @@
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
@@ -18,17 +19,23 @@ def redirect_to_home(request):
 
 @login_required
 def new_article_view(request):
+    user = request.user
+
     if request.method == 'POST':
         form = ArticleForm(request.POST)
-        signoff_form = Article().publish_signoff.forms.get_signoff_form(request.POST)
-        if form.is_valid() and signoff_form.is_valid():
-            article = form.save(commit=False)
-            article.publish_signoff = signoff_form.sign(user=request.user)
-            article.author = request.user
-            article.save()
-            return render(request, 'article/article_detail.html', context={'article': article})
+        signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
+        if form.is_valid():
+            if signoff_form.is_signed_off():
+                article = form.save(commit=False)
+                article.author = user
+                article.publish_signoff.sign(user)
+                article.save()
+                return redirect('article_detail', article.id)
+            else:
+                messages.error(request, "You must agree to the terms before publishing your article.")
     else:
         form = ArticleForm()
+
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
 
 

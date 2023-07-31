@@ -11,15 +11,14 @@ class Article(models.Model):
     article_text = models.TextField(max_length=1000,)
     likes = models.ManyToManyField(User, related_name='article_likes')
     publish_signoff, publish_signet = SignoffField(signoff_type='publish_article_signoff',
-                                                     on_delete=models.CASCADE, null=True, blank=True)
-
+                                                   on_delete=models.CASCADE, null=True, blank=True)
 
     # saves = models.ManyToManyField(User, related_name='article_saves')
 
     def __str__(self):
-        try:
+        if self.author.get_full_name() is not "":
             return f"{self.author.get_full_name()} - {self.title}"
-        except AttributeError:
+        else:
             return f"{self.author.username} - {self.title}"
 
     def total_likes(self):
@@ -29,10 +28,11 @@ class Article(models.Model):
     #     return self.saves.count()
 
     def get_author_name(self):
-        if self.author.get_full_name():
+        if self.author.get_full_name() is not "":
             return self.author.get_full_name()
         else:
-            return str(self.author.username)
+            return self.author.username
+
 
 # class Comment(models.Model):
 #     author = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -6,9 +6,15 @@ from django.contrib.auth.forms import UserCreationForm
 from article.models import Article #, Comment
 from article.forms import ArticleForm
 
+
 #################
 # ARTICLE VIEWS #
 #################
+
+
+def redirect_to_home(request):
+    return redirect('all_articles')
+
 
 @login_required
 def new_article_view(request):
@@ -25,6 +31,7 @@ def new_article_view(request):
         form = ArticleForm()
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
 
+
 def edit_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
     if request.method == 'POST':
@@ -38,28 +45,34 @@ def edit_article_view(request, article_id):
         form = ArticleForm(instance=article)
     return render(request, 'article/edit_article.html', {'form': form, 'article': article})
 
+
 def article_detail_view(request, article_id):
     article = Article.objects.get(id=article_id)
     return render(request, 'article/article_detail.html', {'article': article})
+
 
 def delete_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
     article.delete()
     return HttpResponseRedirect(reverse('my_articles'))
 
+
 @login_required
 def my_articles_view(request):
     articles = Article.objects.all().filter(author=request.user)
     return render(request, 'article/my_articles.html', {'articles': articles})
 
+
 def all_articles_view(request):
     articles = Article.objects.all()
     return render(request, 'article/all_articles.html', {'articles': articles})
+
 
 @login_required
 def all_liked_articles_view(request):
     articles = Article.objects.all().filter(likes=request.user)
     return render(request, 'article/liked_articles.html', {'articles': articles})
+
 
 @login_required
 def like_article_view(request, article_id):
@@ -70,12 +83,15 @@ def like_article_view(request, article_id):
         article.likes.add(request.user)
     return HttpResponseRedirect(reverse('article_detail', args=[str(article_id)]))
 
+
 def custom_profile_redirect(request):
     return redirect('my_articles')
+
 
 def custom_logout(request):
     logout(request)
     return redirect('all_articles')  # Replace 'home' with the URL name of your homepage view
+
 
 def signup_view(request):
     form = UserCreationForm(request.POST)
@@ -87,7 +103,6 @@ def signup_view(request):
         login(request, user)
         return redirect('login')
     return render(request, 'registration/signup.html', {'form': form})
-
 
 
 # @login_required

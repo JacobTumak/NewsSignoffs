@@ -8,6 +8,10 @@
         <h1>Liked Articles <small>({{ articles|length }})</small></h1>
         <hr>
 
+        {% if articles|length == 0 %}
+        <p>You haven't liked any articles yet.</p>
+        {% endif %}
+
         {% for article in articles %}
         <div class="card mb-3">
             <div class="card-body">

@@ -8,6 +8,10 @@
         <h1>All Articles <small>({{ articles|length }})</small></h1>
         <hr>
 
+        {% if articles|length == 0 %}
+            <p>Be the first to <a href="{% url 'new_article' %}">publish an article</a>!</p>
+        {% endif %}
+
         {% for article in articles %}
         <div class="card mb-3">
             <div class="card-body">

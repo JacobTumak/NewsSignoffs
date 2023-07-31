@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'article',
     'signoffs',
+    "signoffs.contrib.signets",
 ]
 
 MIDDLEWARE = [

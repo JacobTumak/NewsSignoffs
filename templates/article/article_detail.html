@@ -1,61 +1,73 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load signoff_tags %}
 {% block content %}
-<div class="article-detail">
-    <h1>{{ article.title }}</h1>
-    <p><strong>Author:</strong><br>{{ article.get_author_name }}</p>
-    <p><strong>Summary:</strong><br>{{ article.summary }}</p>
-    <p><strong>Article:</strong><br>{{ article.article_text }}</p>
-</div>
-
-    <div class="interaction-buttons">
-    {% if request.user != article.author %}
-        <form method="post" action="{% url 'like_article' article.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-primary">
-                {% if request.user in article.likes.all %}
-                    Unlike
-                {% else %}
-                    Like
-                {% endif %}
-                ({{ article.total_likes }})
-            </button>
-        </form>
-    {% else %}
-        <form method="post" action="{% url 'delete_article' article.pk %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Delete Article</button>
-        </form>
-    {% endif %}
-{#        <br>#}
-{#        <form method="post" action="{% url 'save_article' article.pk %}">#}
-{#            {% csrf_token %}#}
-{#            <button type="submit" class="btn btn-secondary">#}
-{#                {% if request.user in article.saves.all %}#}
-{#                    Unsave#}
-{#                {% else %}#}
-{#                    Save#}
-{#                {% endif %}#}
-{#                ({{ article.total_saves }})#}
-{#            </button>#}
-{#        </form>#}
+<div class="offset-md-4">
+    <div class="article-detail">
+        <h1>{{ article.title }}</h1>
+        <div class="signoffs simple-signoff">
+            {% render_signoff article.publish_signoff "signet" %}
+        </div>
+        <p><strong>Author:</strong><br>{{ article.get_author_name }}</p>
+        <p><strong>Summary:</strong><br>{{ article.summary }}</p>
+        <p><strong>Article:</strong><br>{{ article.article_text }}</p>
     </div>
 
-{#    <div class="comments-section">#}
-{#        <h3>Comments</h3>#}
-{#        {% for comment in article.comment_set.all %}#}
-{#            <p>{{ comment.article_text }}</p>#}
-{#            <p>Comment by: {{ comment.author.get_full_name|default:comment.author.username }}</p>#}
-{#        {% endfor %}#}
-{#    </div>#}
+        <div class="interaction-buttons">
+        {% if request.user != article.author %}
+            <form method="post" action="{% url 'like_article' article.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    {% if request.user in article.likes.all %}
+                        Unlike
+                    {% else %}
+                        Like
+                    {% endif %}
+                    ({{ article.total_likes }})
+                </button>
+            </form>
+        {% else %}
+            <div class="btn-group" role="group">
+                <form method="get" action="{% url 'edit_article' article.pk %}">
+                    <button type="submit" class="btn btn-primary">Edit Article</button>
+                </form>
+                <div class="mx-2"></div>
+                <form method="post" action="{% url 'delete_article' article.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete Article</button>
+                </form>
+            </div>
+        {% endif %}
+    {#        <br>#}
+    {#        <form method="post" action="{% url 'save_article' article.pk %}">#}
+    {#            {% csrf_token %}#}
+    {#            <button type="submit" class="btn btn-secondary">#}
+    {#                {% if request.user in article.saves.all %}#}
+    {#                    Unsave#}
+    {#                {% else %}#}
+    {#                    Save#}
+    {#                {% endif %}#}
+    {#                ({{ article.total_saves }})#}
+    {#            </button>#}
+    {#        </form>#}
+        </div>
 
-{#    <form method="post" action="{% url 'add_comment' article.pk %}">#}
-{#        {% csrf_token %}#}
-{#        <div class="form-group">#}
-{#            <label for="{{ comment_form.article_text.id_for_label }}">Add Comment:</label>#}
-{#            {{ comment_form.article_text }}#}
-{#        </div>#}
-{#        <button type="submit" class="btn btn-primary">Post Comment</button>#}
-{#    </form>#}
+    {#    <div class="comments-section">#}
+    {#        <h3>Comments</h3>#}
+    {#        {% for comment in article.comment_set.all %}#}
+    {#            <p>{{ comment.article_text }}</p>#}
+    {#            <p>Comment by: {{ comment.author.get_full_name|default:comment.author.username }}</p>#}
+    {#        {% endfor %}#}
+    {#    </div>#}
+
+    {#    <form method="post" action="{% url 'add_comment' article.pk %}">#}
+    {#        {% csrf_token %}#}
+    {#        <div class="form-group">#}
+    {#            <label for="{{ comment_form.article_text.id_for_label }}">Add Comment:</label>#}
+    {#            {{ comment_form.article_text }}#}
+    {#        </div>#}
+    {#        <button type="submit" class="btn btn-primary">Post Comment</button>#}
+    {#    </form>#}
+    </div>
 </div>
 {% endblock %}

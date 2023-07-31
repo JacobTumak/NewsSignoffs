@@ -4,44 +4,50 @@
 
 <style>
     input, label {
-    display:block;
-}
+        display:block;
+    }
 </style>
 
 {% block content %}
 <div class="row justify-content-center mt-5">
-  <div class="col-lg-6">
-    <div class="card">
-      <div class="card-header bg-primary text-white">
-        <h3 class="card-title">Create a New Article</h3>
-      </div>
-      <div class="card-body" style="margin:0 auto;">
-        <form method="post">
-          {% csrf_token %}
-          <div class="form-group">
-            <label for="{{ form.title.id_for_label }}">Title</label>
-              <div>
-            {{ form.title }}
-              </div>
-          </div>
-          <div class="form-group">
-            <label for="{{ form.summary.id_for_label }}">Article Summary</label>
-              <div>
-            {{ form.summary }}
-              </div>
-          </div>
-          <div class="form-group">
-            <label for="{{ form.article_text.id_for_label }}">Article Text</label>
-              <div>
-            {{ form.article_text }}
-              </div>
-          </div>
-        <div class="signoffs simple-signoff">
-            {% render_signoff article.publish_signoff "form" %} {# specifying "form" is redundant, only for verbosity #}
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title">Create a New Article</h3>
+            </div>
+            <div class="card-body" style="margin:0 auto;">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="{{ form.title.id_for_label }}">Title</label>
+                        <div>
+                            {{ form.title }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.summary.id_for_label }}">Article Summary</label>
+                        <div>
+                            {{ form.summary }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.article_text.id_for_label }}">Article Text</label>
+                        <div>
+                            {{ form.article_text }}
+                        </div>
+                    </div>
+                    <div class="signoffs simple-signoff">
+                        {% render_signoff article.publish_signoff "form" %} {# specifying "form" is redundant, only for verbosity #}
+                    </div>
+                </form>
+                <br>
+                <div>
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
-        </form>
-      </div>
     </div>
-  </div>
 </div>
 {% endblock %}

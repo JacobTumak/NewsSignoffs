@@ -1,6 +1,12 @@
 from django.forms import ModelForm, Textarea, BooleanField
+from django.contrib.auth.forms import UserCreationForm
 from signoffs.forms import AbstractSignoffForm
 from article.models import Article #, Comment
+
+
+class SignupForm(UserCreationForm):
+    pass
+
 
 class ArticleForm(ModelForm):
     class Meta:

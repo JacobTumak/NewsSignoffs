@@ -10,13 +10,13 @@ class Article(models.Model):
     summary = models.TextField(max_length=100, null=False, blank=False)
     article_text = models.TextField(max_length=1000,)
     likes = models.ManyToManyField(User, related_name='article_likes')
-    publish_signoff, publish_signet = SignoffField(signoff_type='publish_article_signoff',
-                                                   on_delete=models.CASCADE, null=True, blank=True)
+
+    publish_signoff, publish_signet = SignoffField(publish_article_signoff)
 
     # saves = models.ManyToManyField(User, related_name='article_saves')
 
     def __str__(self):
-        if self.author.get_full_name() is not "":
+        if self.author.get_full_name() != "":
             return f"{self.author.get_full_name()} - {self.title}"
         else:
             return f"{self.author.username} - {self.title}"
@@ -28,7 +28,7 @@ class Article(models.Model):
     #     return self.saves.count()
 
     def get_author_name(self):
-        if self.author.get_full_name() is not "":
+        if self.author.get_full_name() != "":
             return self.author.get_full_name()
         else:
             return self.author.username

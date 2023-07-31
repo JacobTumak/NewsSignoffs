@@ -113,7 +113,7 @@ def signup_view(request):
 
             login(request, user)  # Login new user
 
-            return redirect('all_articles')
+            return redirect('my_articles')
     else:
         form = SignupForm()
 

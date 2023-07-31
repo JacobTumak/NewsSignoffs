@@ -3,9 +3,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
-from django.contrib.auth.forms import UserCreationForm
 from article.models import Article #, Comment
-from article.forms import ArticleForm
+from article.forms import ArticleForm, SignupForm
 
 
 #################
@@ -39,6 +38,7 @@ def new_article_view(request):
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
 
 
+@login_required()
 def edit_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
     if request.method == 'POST':
@@ -101,14 +101,22 @@ def custom_logout(request):
 
 
 def signup_view(request):
-    form = UserCreationForm(request.POST)
-    if form.is_valid():
-        form.save()
-        username = form.cleaned_data.get('username')
-        password = form.cleaned_data.get('password1')
-        user = authenticate(username=username, password=password)
-        login(request, user)
-        return redirect('login')
+    if request.method == 'POST':
+        form = SignupForm(request.POST)
+
+        if form.is_valid():
+            form.save()  # Create new user
+
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=password)
+
+            login(request, user)  # Login new user
+
+            return redirect('all_articles')
+    else:
+        form = SignupForm()
+
     return render(request, 'registration/signup.html', {'form': form})
 
 

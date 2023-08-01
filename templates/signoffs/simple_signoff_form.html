@@ -2,12 +2,13 @@
     <form method="post" class="signoffs signoff-{{ signoff.slug }}" action="{{ signoff.urls.get_save_url }}">
         {% csrf_token %}
         <div class="signoff-form mb-3">
-            {% for field in signoff_form %}
-                {% if not field.is_hidden %}
-                    {{ field.label_tag }}
-                    {{ field }}
-                    <p><small>{{ field.help_text }}</small></p>
-                {% endif %}
+            {% for field in signoff_form.visible_fields %}
+                {{ field.label_tag }}
+                {{ field }}
+                <p><small>{{ field.help_text }}</small></p>
+            {% endfor %}
+            {% for field in signoff_form.hidden_fields %}
+                {{ field }}
             {% endfor %}
         </div>
         <div class="form-actions">

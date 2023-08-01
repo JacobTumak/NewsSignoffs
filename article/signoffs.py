@@ -10,7 +10,7 @@ class AgreeSignoffForm(AbstractSignoffForm):
 publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff',
                                                     signet=Signet,
                                                     label='I agree to the terms and conditions',
-                                                    render=SignoffRenderer(form_context=dict(
-                                                        submit_label='Publish Article',
-                                                        help_text='<small>Publishing will make this article viewable to everyone.</small>',
+                                                    render=SignoffRenderer(signoff_form_template='simple_signoff_form.html',
+                                                                           form_context=dict(submit_label='Publish Article',
+                                                                                             help_text='Publishing will make this article viewable to everyone.',
                                                     )))

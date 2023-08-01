@@ -18,29 +18,40 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
+{#            <ul class="navbar-nav">#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link" href="{% url 'new_article' %}">New Article</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link" href="{% url 'all_articles' %}">All Articles</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link" href="{% url 'my_articles' %}">My Articles</a>#}
+{#                </li>#}
+{#                <li class="nav-item">#}
+{#                    <a class="nav-link" href="{% url 'liked_articles' %}">Liked Articles</a>#}
+{#                </li>#}
+{#            </ul>#}
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'new_article' %}">New Article</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'all_articles' %}">All Articles</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'my_articles' %}">My Articles</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'liked_articles' %}">Liked Articles</a>
-                </li>
                 {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout of {{ user }}</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            {{ user }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'new_article' %}">New Article</a></li>
+                            <li><a class="dropdown-item" href="{% url 'my_articles' %}">My Articles</a></li>
+                            <li><a class="dropdown-item" href="{% url 'liked_articles' %}">Liked Articles</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
+                        </ul>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'signup' %}">Create an Account</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'signup' %}">Create an Account</a>
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
                     </li>
                 {% endif %}
             </ul>

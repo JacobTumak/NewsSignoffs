@@ -1,11 +1,15 @@
 from django.forms import BooleanField
-from signoffs.signoffs import RevokableSignoff, SignoffRenderer, SimpleSignoff
+from signoffs.signoffs import SimpleSignoff, RevokableSignoff, SignoffRenderer
 from signoffs.models import Signet
 from signoffs.forms import SignoffFormsManager, AbstractSignoffForm
+
 
 class AgreeSignoffForm(AbstractSignoffForm):
     """ Require the user to signoff for the form to validate """
     signed_off = BooleanField(label='I agree', required=True)
+
+
+tos_signoff = SimpleSignoff.register(id='tos_signoff')
 
 publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff',
                                                     signet=Signet,

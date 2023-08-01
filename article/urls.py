@@ -7,6 +7,7 @@ urlpatterns = [
     path('accounts/profile/', views.custom_profile_redirect, name='custom_profile_redirect'),
     path('accounts/profile/logout/', views.custom_logout, name='logout'),
     path('signup/', views.signup_view, name='signup'),
+    path('signup/terms-of-service/', views.terms_of_service_view, name='terms_of_service'),
     path('new-article/', views.new_article_view, name='new_article'),
     path('article-detail/<int:article_id>/', views.article_detail_view, name='article_detail'),
     path('all-articles/', views.all_articles_view, name='all_articles'),

@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from django.urls import reverse
-from article.models import Article #, Comment
+from article.models import Article, TermsOfService #, Comment
 from article.forms import ArticleForm, SignupForm
 
 
@@ -113,11 +113,27 @@ def signup_view(request):
 
             login(request, user)  # Login new user
 
-            return redirect('my_articles')
+            return redirect('terms_of_service')
+
     else:
         form = SignupForm()
 
     return render(request, 'registration/signup.html', {'form': form})
+
+
+def terms_of_service_view(request):
+    user = request.user
+
+    if request.method =='POST':
+        signoff_form = TermsOfService.terms_signoff.forms.get_signoff_form(request.POST)
+        if signoff_form.is_signed_off():
+            terms = TermsOfService.objects.create(user=user)
+            terms.terms_signoff.sign(user)
+            return redirect('my_articles')
+        else:
+            messages.error(request, "You must agree to the Terms of Service.")
+
+    return render(request, 'registration/terms_of_service.html', {'terms': TermsOfService()})
 
 
 # @login_required

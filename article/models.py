@@ -21,6 +21,10 @@ class Article(models.Model):
         else:
             return f"{self.author.username} - {self.title}"
 
+    def delete(self, *args, **kwargs):
+        self.publish_signet.delete()     # Delete the signet associated with the article
+        super().delete(*args, **kwargs)  # Delete the article itself
+
     def total_likes(self):
         return self.likes.count()
 

@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-from signoffs.models import SignoffField
+from signoffs.models import SignoffField, ApprovalField
 from article.signoffs import tos_signoff, publish_article_signoff
+from article.approvals import publication_request_signoff, publication_approval_signoff
 
 
 def get_terms_of_service():
@@ -30,9 +31,9 @@ class Article(models.Model):
     article_text = models.TextField(max_length=1000,)
     likes = models.ManyToManyField(User, related_name='article_likes')
 
-    publish_signoff, publish_signet = SignoffField(publish_article_signoff)
-
-    # saves = models.ManyToManyField(User, related_name='article_saves')
+    publish_signoff, publish_signet = SignoffField(publish_article_signoff, editable=False)
+    # publication_request = ApprovalField(publication_request_signoff)
+    # publication_approval = ApprovalField(publication_approval_signoff)
 
     def __str__(self):
         if self.author.get_full_name() != "":
@@ -55,14 +56,3 @@ class Article(models.Model):
             return self.author.get_full_name()
         else:
             return self.author.username
-
-
-# class Comment(models.Model):
-#     author = models.ForeignKey(User, on_delete=models.CASCADE)
-#     comment_text = models.TextField(max_length=250, default='Comment text')
-#     likes = models.ManyToManyField(User, related_name='comment_likes')
-#     def __str__(self):
-#         return f"comment - {self.author.username}'"
-#
-#     def total_likes(self):
-#         return self.likes.count()

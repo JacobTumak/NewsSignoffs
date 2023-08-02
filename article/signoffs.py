@@ -1,7 +1,8 @@
 from django.forms import BooleanField
-from signoffs.signoffs import SimpleSignoff, RevokableSignoff, SignoffRenderer
+from signoffs.signoffs import SimpleSignoff, RevokableSignoff, SignoffRenderer, BaseSignoff
+from signoffs.contrib.signets.signoffs import IrrevokableSignoff # TODO: Why isn't this importable from the main signoffs file?
 from signoffs.models import Signet
-from signoffs.forms import SignoffFormsManager, AbstractSignoffForm
+from signoffs.forms import AbstractSignoffForm
 
 
 class AgreeSignoffForm(AbstractSignoffForm):
@@ -9,7 +10,7 @@ class AgreeSignoffForm(AbstractSignoffForm):
     signed_off = BooleanField(label='I agree', required=True)
 
 
-tos_signoff = SimpleSignoff.register(id='tos_signoff')
+tos_signoff = IrrevokableSignoff.register(id='tos_signoff')
 
 publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff',
                                                     signet=Signet,

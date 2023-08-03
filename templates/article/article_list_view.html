@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 
-{% block title %}All Articles - Powderflask News{% endblock %}
+{% block title %} {{ page_title }} - Powderflask News{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
-        <h1>All Articles <small>({{ articles|length }})</small></h1>
+        <h1>{{ page_title}} <small>({{ articles|length }})</small></h1>
         <hr>
 
         {% if articles|length == 0 %}
-            <p>Be the first to <a href="{% url 'new_article' %}">publish an article</a>!</p>
+        <p>{{ empty_text}}</p>
         {% endif %}
 
         {% for article in articles %}

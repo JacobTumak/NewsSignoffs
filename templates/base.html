@@ -33,6 +33,9 @@
                             {{ user }}
                         </a>
                         <ul class="dropdown-menu">
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item" href="{% url 'fact_check_requests' %}">Fact Check</a></li>
+                            {% endif %}
                             <li><a class="dropdown-item" href="{% url 'my_articles' %}">My Articles</a></li>
                             <li><a class="dropdown-item" href="{% url 'liked_articles' %}">Liked Articles</a></li>
                             <li><hr class="dropdown-divider"></li>

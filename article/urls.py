@@ -18,5 +18,7 @@ urlpatterns = [
     path('like-article/<int:article_id>/', views.like_article_view, name='like_article'),
     path('delete-article/<int:article_id>/', views.delete_article_view, name='delete_article'),
     path('edit-article/<int:article_id>/', views.edit_article_view, name='edit_article'),
+    path('request-fact-check/<int:article_id>/', views.request_fact_check_view, name='request_fact_check'),
+    path('fact_check_requests/', views.fact_check_requests_view, name='fact_check_requests'),
     # path('save-article/<int:article_id>/', save_article_view, name='save_article'),
 ]

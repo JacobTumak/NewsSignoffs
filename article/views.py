@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
 
@@ -9,6 +9,18 @@ from signoffs.contrib.signets.models import Signet
 from article.models import Article #, Comment
 from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, SignupForm
+
+
+def terms_check(user):
+    try:
+        signoff = Signet.objects.get(signoff_id='terms_signoff', user=user).signoff
+    except Signet.DoesNotExist:
+        signoff = None
+
+    if signoff is not None:
+        return True
+    else:
+        return False
 
 
 #################
@@ -21,6 +33,7 @@ def redirect_to_home(request):
 
 
 @login_required
+@user_passes_test(terms_check, login_url='terms_of_service')
 def new_article_view(request):
     user = request.user
 
@@ -127,6 +140,7 @@ def signup_view(request):
 
 def terms_of_service_view(request):
     user = request.user
+    next_page = request.GET.get('next') or 'my_articles'
 
     try:
         signoff = Signet.objects.get(signoff_id='terms_signoff', user=user).signoff
@@ -137,7 +151,7 @@ def terms_of_service_view(request):
         signoff_form = signoff.forms.get_signoff_form(request.POST)
         if signoff_form.is_signed_off():
             signoff.sign(user)
-            return redirect('my_articles')
+            return redirect(next_page)
         else:
             messages.error(request, "You must agree to the Terms of Service.")
 
@@ -156,7 +170,6 @@ def newsletter_view(request):
         signoff_form = signoff.forms.get_signoff_form(request.POST)
         if signoff_form.is_signed_off():
             signoff.sign(user)
-            messages.success(request, f"Thanks for signing up, { user.username }!")
             return redirect('newsletter')
         else:
             messages.error(request, "You must check the box to sign up for our newsletter.")

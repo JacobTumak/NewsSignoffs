@@ -12,7 +12,7 @@ class Article(models.Model):
     article_text = models.TextField(max_length=1000,)
     likes = models.ManyToManyField(User, related_name='article_likes')
 
-    publish_signoff, publish_signet = SignoffField(publish_article_signoff, editable=False)
+    publish_signoff, publish_signet = SignoffField(publish_article_signoff)
     # publication_request = ApprovalField(publication_request_signoff)
     # publication_approval = ApprovalField(publication_approval_signoff)
 

@@ -4,8 +4,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
 
-from signoffs.contrib.signets.models import Signet
-
 from article.models import Article #, Comment
 from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, SignupForm

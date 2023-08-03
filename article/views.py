@@ -7,7 +7,7 @@ from django.urls import reverse
 from signoffs.contrib.signets.models import Signet
 
 from article.models import Article #, Comment
-from article.signoffs import terms_signoff
+from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, SignupForm
 
 
@@ -142,6 +142,26 @@ def terms_of_service_view(request):
             messages.error(request, "You must agree to the Terms of Service.")
 
     return render(request, 'registration/terms_of_service.html', {'signoff': signoff})
+
+
+def newsletter_view(request):
+    user = request.user
+
+    try:
+        signoff = Signet.objects.get(signoff_id='newsletter_signoff', user=user).signoff
+    except:
+        signoff = newsletter_signoff()
+
+    if request.method == 'POST':
+        signoff_form = signoff.forms.get_signoff_form(request.POST)
+        if signoff_form.is_signed_off():
+            signoff.sign(user)
+            messages.success(request, f"Thanks for signing up, { user.username }!")
+            return redirect('newsletter')
+        else:
+            messages.error(request, "You must check the box to sign up for our newsletter.")
+
+    return render(request, 'registration/newsletter.html', {'signoff': signoff})
 
 
 # @login_required

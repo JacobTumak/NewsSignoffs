@@ -8,7 +8,7 @@ from signoffs.models import Signet
 terms_signoff = IrrevokableSignoff.register(id='terms_signoff',
                                             logic=DefaultSignoffBusinessLogic(revoke_perm=False))  # Shouldn't have to override the default logic
 
-marketing_signoff = RevokableSignoff.register(id='marketing_signoff')
+newsletter_signoff = RevokableSignoff.register(id='newsletter_signoff')
 
 publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff',
                                                     signet=Signet,

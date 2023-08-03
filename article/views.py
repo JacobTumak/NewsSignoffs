@@ -1,9 +1,13 @@
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
-from article.models import Article, TermsOfService #, Comment
+
+from signoffs.contrib.signets.models import Signet
+
+from article.models import Article #, Comment
+from article.signoffs import terms_signoff
 from article.forms import ArticleForm, SignupForm
 
 
@@ -124,16 +128,20 @@ def signup_view(request):
 def terms_of_service_view(request):
     user = request.user
 
-    if request.method =='POST':
-        signoff_form = TermsOfService.terms_signoff.forms.get_signoff_form(request.POST)
+    try:
+        signoff = Signet.objects.get(signoff_id='terms_signoff', user=user).signoff
+    except:
+        signoff = terms_signoff()
+
+    if request.method == 'POST':
+        signoff_form = signoff.forms.get_signoff_form(request.POST)
         if signoff_form.is_signed_off():
-            terms = TermsOfService.objects.create(user=user)
-            terms.terms_signoff.sign(user)
+            signoff.sign(user)
             return redirect('my_articles')
         else:
             messages.error(request, "You must agree to the Terms of Service.")
 
-    return render(request, 'registration/terms_of_service.html', {'terms': TermsOfService()})
+    return render(request, 'registration/terms_of_service.html', {'signoff': signoff})
 
 
 # @login_required

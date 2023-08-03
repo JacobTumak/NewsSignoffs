@@ -36,6 +36,8 @@
                             <li><a class="dropdown-item" href="{% url 'my_articles' %}">My Articles</a></li>
                             <li><a class="dropdown-item" href="{% url 'liked_articles' %}">Liked Articles</a></li>
                             <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'terms_of_service' %}">Terms of Service</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{% url 'logout' %}">Logout</a></li>
                         </ul>
                     </li>
@@ -63,7 +65,7 @@
 <!-- Footer -->
 <footer class="bg-dark text-light py-3" style="margin-top: auto">
     <div class="container text-center">
-        &copy;Powderflask News. All rights reserved.
+       Powderflask News &copy; {% now "Y" %}. All rights reserved.
     </div>
 </footer>
 

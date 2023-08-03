@@ -16,11 +16,13 @@
     </div>
 
     {% if messages %}
-    <div class="mt-5">
+    <div class="mt-5" style="color: red;">
         <h6>Something went wrong...</h6>
+        <ul>
         {% for message in messages %}
-            <p>{{ message }}</p>
+            <li><em>{{ message }}</em></li>
         {% endfor %}
+        </ul>
     </div>
     {% endif %}
 </div>

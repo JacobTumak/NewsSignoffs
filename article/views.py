@@ -12,15 +12,8 @@ from article.forms import ArticleForm, SignupForm
 
 
 def terms_check(user):
-    try:
-        signoff = Signet.objects.get(signoff_id='terms_signoff', user=user).signoff
-    except Signet.DoesNotExist:
-        signoff = None
-
-    if signoff is not None:
-        return True
-    else:
-        return False
+    signoff = terms_signoff.get(user=user)
+    return signoff.is_signed()
 
 
 #################
@@ -142,10 +135,7 @@ def terms_of_service_view(request):
     user = request.user
     next_page = request.GET.get('next') or 'my_articles'
 
-    try:
-        signoff = Signet.objects.get(signoff_id='terms_signoff', user=user).signoff
-    except:
-        signoff = terms_signoff()
+    signoff = terms_signoff.get(user=user)
 
     if request.method == 'POST':
         signoff_form = signoff.forms.get_signoff_form(request.POST)
@@ -161,10 +151,7 @@ def terms_of_service_view(request):
 def newsletter_view(request):
     user = request.user
 
-    try:
-        signoff = Signet.objects.get(signoff_id='newsletter_signoff', user=user).signoff
-    except:
-        signoff = newsletter_signoff()
+    signoff = newsletter_signoff.get(user=user)
 
     if request.method == 'POST':
         signoff_form = signoff.forms.get_signoff_form(request.POST)

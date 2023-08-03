@@ -1,12 +1,9 @@
 from django.forms import BooleanField
-from signoffs.signoffs import SimpleSignoff, RevokableSignoff, SignoffRenderer
-from signoffs.contrib.signets.signoffs import IrrevokableSignoff  # Add IrrevokableSignoff to signoffs.signoffs
-from signoffs.core.signoffs import DefaultSignoffBusinessLogic
+from signoffs.signoffs import SimpleSignoff, RevokableSignoff, IrrevokableSignoff, SignoffRenderer
 from signoffs.models import Signet
 
 
-terms_signoff = IrrevokableSignoff.register(id='terms_signoff',
-                                            logic=DefaultSignoffBusinessLogic(revoke_perm=False))  # Shouldn't have to override the default logic
+terms_signoff = IrrevokableSignoff.register(id='terms_signoff')
 
 newsletter_signoff = RevokableSignoff.register(id='newsletter_signoff')
 

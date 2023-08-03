@@ -1,0 +1,27 @@
+{% if signoff.is_signed %}
+    <div class="signoffs signet {% if is_revokable %}revokable{% endif %}">
+        <div class="signet-field-group">
+            <span class="sigil">
+                <span class="signet-field-label">
+                    {{ signoff.sigil_label }}
+                </span>
+                <span class="signet-field">
+                    {{ signoff.sigil }}
+                </span>
+            </span>
+            <span class="timestamp">
+                <span class="signet-field-label">
+                    on
+                </span>
+                <span class="signet-field">
+                    {{ signoff.timestamp|date:"DATE_FORMAT" }}
+                </span>
+            </span>
+            {% if is_revokable %}
+            <a class="revoke-button" type="button" title="Revoke this signoff" href="{{ signoff.urls_get_revoke_url }}">
+                <small class="px-2">X</small>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}

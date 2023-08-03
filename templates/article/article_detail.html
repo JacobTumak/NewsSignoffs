@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
-{% load static %}
 {% load signoff_tags %}
+
+{% block title %}{{ article.title }} by {{ article.author }} - Powderflask News{% endblock %}
+
 {% block content %}
-<div class="offset-md-4">
-    <div class="article-detail">
+<div class="col-md-8 offset-md-2">
+    <div class="article-detail pb-3">
         <h1>{{ article.title }}</h1>
-        <div class="signoffs simple-signoff">
+        <hr>
+        <div class="signoffs simple-signoff mb-3">
             {% render_signoff article.publish_signoff "signet" %}
         </div>
         <p><strong>Author:</strong><br>{{ article.get_author_name }}</p>
@@ -13,7 +16,7 @@
         <p><strong>Article:</strong><br>{{ article.article_text }}</p>
     </div>
 
-        <div class="interaction-buttons">
+    <div class="interaction-buttons">
         {% if request.user != article.author %}
             <form method="post" action="{% url 'like_article' article.pk %}">
                 {% csrf_token %}
@@ -50,7 +53,7 @@
     {#                ({{ article.total_saves }})#}
     {#            </button>#}
     {#        </form>#}
-        </div>
+    </div>
 
     {#    <div class="comments-section">#}
     {#        <h3>Comments</h3>#}
@@ -68,6 +71,5 @@
     {#        </div>#}
     {#        <button type="submit" class="btn btn-primary">Post Comment</button>#}
     {#    </form>#}
-    </div>
 </div>
 {% endblock %}

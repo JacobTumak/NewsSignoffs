@@ -27,7 +27,7 @@ def new_article_view(request):
     if request.method == 'POST':
         form = ArticleForm(request.POST)
         signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
-        if form.is_valid():
+        if form.is_valid() and signoff_form.is_valid():
             if signoff_form.is_signed_off():
                 article = form.save(commit=False)
                 article.author = user

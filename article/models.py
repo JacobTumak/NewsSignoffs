@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
-from signoffs.models import SignoffField
+from signoffs.models import SignoffField, ApprovalField
 from article.signoffs import publish_article_signoff
+from article.approvals import publication_request_signoff, publication_approval_signoff
 
 
 class Article(models.Model):
@@ -11,7 +12,9 @@ class Article(models.Model):
     article_text = models.TextField(max_length=1000,)
     likes = models.ManyToManyField(User, related_name='article_likes')
 
-    publish_signoff, publish_signet = SignoffField(publish_article_signoff)
+    publish_signoff, publish_signet = SignoffField(publish_article_signoff, editable=False)
+    # publication_request = ApprovalField(publication_request_signoff)
+    # publication_approval = ApprovalField(publication_approval_signoff)
 
     # saves = models.ManyToManyField(User, related_name='article_saves')
 

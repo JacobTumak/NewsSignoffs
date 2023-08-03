@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'article',
     'signoffs',
     "signoffs.contrib.signets",
+    "signoffs.contrib.approvals",
 ]
 
 MIDDLEWARE = [

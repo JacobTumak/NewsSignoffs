@@ -4,13 +4,15 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
 
+from signoffs.shortcuts import get_signoff_or_404
+
 from article.models import Article #, Comment
 from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, SignupForm
 
 
 def terms_check(user):
-    signoff = terms_signoff.get(user=user)
+    signoff = terms_signoff.get(signoff_id='terms_signoff', user=user)  # Remove signoff_id when signoffs is updated
     return signoff.is_signed()
 
 
@@ -131,9 +133,9 @@ def signup_view(request):
 
 def terms_of_service_view(request):
     user = request.user
-    next_page = request.GET.get('next') or 'my_articles'
+    next_page = request.GET.get('next') or 'terms_of_service'
 
-    signoff = terms_signoff.get(user=user)
+    signoff = terms_signoff.get(signoff_id='terms_signoff', user=user)  # Remove signoff_id when signoffs is updated
 
     if request.method == 'POST':
         signoff_form = signoff.forms.get_signoff_form(request.POST)
@@ -149,7 +151,8 @@ def terms_of_service_view(request):
 def newsletter_view(request):
     user = request.user
 
-    signoff = newsletter_signoff.get(user=user)
+    signoff = newsletter_signoff.get(signoff_id='newsletter_signoff',
+                                     user=user)  # Remove signoff_id when signoffs is updated
 
     if request.method == 'POST':
         signoff_form = signoff.forms.get_signoff_form(request.POST)
@@ -160,6 +163,13 @@ def newsletter_view(request):
             messages.error(request, "You must check the box to sign up for our newsletter.")
 
     return render(request, 'registration/newsletter.html', {'signoff': signoff})
+
+
+def revoke_newsletter_view(request, signet_id):
+    signoff = get_signoff_or_404(newsletter_signoff, signet_id)
+    signoff.revoke_if_permitted(user=request.user)
+
+    return redirect('newsletter')
 
 
 # @login_required

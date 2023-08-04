@@ -1,11 +1,12 @@
 from django.forms import BooleanField
-from signoffs.signoffs import SimpleSignoff, RevokableSignoff, IrrevokableSignoff, SignoffRenderer
+from signoffs.signoffs import SimpleSignoff, RevokableSignoff, IrrevokableSignoff, SignoffRenderer, SignoffUrlsManager
 from signoffs.models import Signet
 
 
 terms_signoff = IrrevokableSignoff.register(id='terms_signoff')
 
-newsletter_signoff = RevokableSignoff.register(id='newsletter_signoff')
+newsletter_signoff = RevokableSignoff.register(id='newsletter_signoff',
+                                               urls=SignoffUrlsManager(revoke_url_name='revoke_newsletter'))
 
 publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff',
                                                     signet=Signet,

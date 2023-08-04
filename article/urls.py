@@ -9,6 +9,7 @@ urlpatterns = [
     path('signup/', views.signup_view, name='signup'),
     path('signup/terms-of-service/', views.terms_of_service_view, name='terms_of_service'),
     path('signup/newsletter/', views.newsletter_view, name='newsletter'),
+    path('signup/newsletter/revoke/<int:signet_id>', views.revoke_newsletter_view, name='revoke_newsletter'),
     path('new-article/', views.new_article_view, name='new_article'),
     path('article-detail/<int:article_id>/', views.article_detail_view, name='article_detail'),
     path('all-articles/', views.all_articles_view, name='all_articles'),

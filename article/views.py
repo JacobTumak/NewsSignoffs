@@ -6,7 +6,7 @@ from django.urls import reverse
 
 from signoffs.shortcuts import get_signoff_or_404
 
-from article.models import Article #, Comment
+from article.models.models import Article #, Comment
 from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, SignupForm
 

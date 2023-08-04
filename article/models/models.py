@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+
 from signoffs.models import SignoffField, ApprovalField
+
 from article.signoffs import publish_article_signoff
 from article.approvals import publication_request_signoff, publication_approval_signoff
 

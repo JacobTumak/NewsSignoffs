@@ -1,7 +1,6 @@
-from django.forms import ModelForm, TextInput, Textarea, BooleanField
+from django.forms import ModelForm, TextInput, Textarea
 from django.contrib.auth.forms import UserCreationForm
-from signoffs.forms import AbstractSignoffForm
-from article.models import Article
+from article.models.models import Article
 
 
 class SignupForm(UserCreationForm):

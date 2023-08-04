@@ -12,7 +12,7 @@ from article.forms import ArticleForm, SignupForm
 
 
 def terms_check(user):
-    signoff = terms_signoff.get(signoff_id='terms_signoff', user=user)  # Remove signoff_id when signoffs is updated
+    signoff = terms_signoff.get(user=user)
     return signoff.is_signed()
 
 
@@ -135,7 +135,7 @@ def terms_of_service_view(request):
     user = request.user
     next_page = request.GET.get('next') or 'terms_of_service'
 
-    signoff = terms_signoff.get(signoff_id='terms_signoff', user=user)  # Remove signoff_id when signoffs is updated
+    signoff = terms_signoff.get(user=user)
 
     if request.method == 'POST':
         signoff_form = signoff.forms.get_signoff_form(request.POST)
@@ -151,8 +151,7 @@ def terms_of_service_view(request):
 def newsletter_view(request):
     user = request.user
 
-    signoff = newsletter_signoff.get(signoff_id='newsletter_signoff',
-                                     user=user)  # Remove signoff_id when signoffs is updated
+    signoff = newsletter_signoff.get(user=user)
 
     if request.method == 'POST':
         signoff_form = signoff.forms.get_signoff_form(request.POST)

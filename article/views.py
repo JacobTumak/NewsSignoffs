@@ -166,7 +166,7 @@ def newsletter_view(request):
 
 def revoke_newsletter_view(request, signet_id):
     signoff = get_signoff_or_404(newsletter_signoff, signet_id)
-    signoff.revoke_if_permitted(user=request.user)
+    signoff.revoke_if_permitted(user=request.user, reason='I no longer wish to receive the newsletter.')
 
     return redirect('newsletter')
 

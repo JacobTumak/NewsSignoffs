@@ -1,28 +1,20 @@
 from django.contrib import messages
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
-
 from signoffs.shortcuts import get_signoff_or_404
-
-from article.models.models import Article #, Comment
+from article.models.models import Article
 from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, SignupForm
+from signoffs.models import Signet
 
-
-def terms_check(user):
-    signoff = terms_signoff.get(user=user)
-    return signoff.is_signed()
-
-
-#################
-# ARTICLE VIEWS #
-#################
-
-
-def redirect_to_home(request):
-    return redirect('all_articles')
+def terms_check(user): # FIXME
+    try:
+        signoff= terms_signoff.get(user=user)
+        return signoff.is_signed()
+    except Signet.MultipleObjectsReturned:
+        return True
 
 
 @login_required
@@ -48,7 +40,7 @@ def new_article_view(request):
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
 
 
-@login_required()
+@login_required
 def edit_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
     if request.method == 'POST':
@@ -63,33 +55,6 @@ def edit_article_view(request, article_id):
     return render(request, 'article/edit_article.html', {'form': form, 'article': article})
 
 
-def article_detail_view(request, article_id):
-    article = Article.objects.get(id=article_id)
-    return render(request, 'article/article_detail.html', {'article': article})
-
-
-def delete_article_view(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
-    article.delete()
-    return HttpResponseRedirect(reverse('my_articles'))
-
-
-@login_required
-def my_articles_view(request):
-    articles = Article.objects.all().filter(author=request.user)
-    return render(request, 'article/my_articles.html', {'articles': articles})
-
-
-def all_articles_view(request):
-    articles = Article.objects.all()
-    return render(request, 'article/all_articles.html', {'articles': articles})
-
-
-@login_required
-def all_liked_articles_view(request):
-    articles = Article.objects.all().filter(likes=request.user)
-    return render(request, 'article/liked_articles.html', {'articles': articles})
-
 
 @login_required
 def like_article_view(request, article_id):
@@ -99,15 +64,6 @@ def like_article_view(request, article_id):
     else:
         article.likes.add(request.user)
     return HttpResponseRedirect(reverse('article_detail', args=[str(article_id)]))
-
-
-def custom_profile_redirect(request):
-    return redirect('my_articles')
-
-
-def custom_logout(request):
-    logout(request)
-    return redirect('all_articles')  # Replace 'home' with the URL name of your homepage view
 
 
 def signup_view(request):
@@ -169,13 +125,3 @@ def revoke_newsletter_view(request, signet_id):
     signoff.revoke_if_permitted(user=request.user)
 
     return redirect('newsletter')
-
-
-# @login_required
-# def save_article_view(request, article_id):
-#     article = get_object_or_404(Article, id=article_id)
-#     if request.user in article.saves.all():
-#         article.saves.remove(request.user)
-#     else:
-#         article.saves.add(request.user)
-#     return HttpResponseRedirect(reverse('article_detail', args=[str(article_id)]))

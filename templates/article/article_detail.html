@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 {% load signoff_tags %}
-{% load article_badges %}
 
 {% block title %}{{ article.title }} by {{ article.author }} - Powderflask News{% endblock %}
 
 {% block content %}
 <div class="col-md-8 offset-md-2">
     <div class="article-detail pb-3">
-        <h1>{{ article.title }}<span class="float-right">{% fact_check_badge article %}</span></h1>
+        <h1>{{ article.title }}</h1>
         <hr>
         <div class="signoffs simple-signoff mb-3">
             {% render_signoff article.publish_signoff "signet" %}
@@ -16,7 +15,6 @@
         <p><strong>Summary:</strong><br>{{ article.summary }}</p>
         <p><strong>Article:</strong><br>{{ article.article_text }}</p>
     </div>
-
     <div class="interaction-buttons">
         {% if request.user != article.author %}
             <form method="post" action="{% url 'like_article' article.pk %}">
@@ -30,17 +28,6 @@
                     ({{ article.total_likes }})
                 </button>
             </form>
-            {% if request.user.is_staff %}
-            <form method="post" action="{% url 'fact_check_article' article.pk %}">
-                {% csrf_token %}
-                {{ fact_check_form.result }}
-            </form>
-            {% else %}
-            <form method="post" action="{% url 'request_fact_check' article.pk %}">
-                {% csrf_token %}
-                {{ fact_check_form.requested }}
-            </form>
-            {% endif %}
         {% else %}
             <div class="btn-group" role="group">
                 <form method="get" action="{% url 'edit_article' article.pk %}">
@@ -53,35 +40,6 @@
                 </form>
             </div>
         {% endif %}
-    {#        <br>#}
-    {#        <form method="post" action="{% url 'save_article' article.pk %}">#}
-    {#            {% csrf_token %}#}
-    {#            <button type="submit" class="btn btn-secondary">#}
-    {#                {% if request.user in article.saves.all %}#}
-    {#                    Unsave#}
-    {#                {% else %}#}
-    {#                    Save#}
-    {#                {% endif %}#}
-    {#                ({{ article.total_saves }})#}
-    {#            </button>#}
-    {#        </form>#}
     </div>
-
-    {#    <div class="comments-section">#}
-    {#        <h3>Comments</h3>#}
-    {#        {% for comment in article.comment_set.all %}#}
-    {#            <p>{{ comment.article_text }}</p>#}
-    {#            <p>Comment by: {{ comment.author.get_full_name|default:comment.author.username }}</p>#}
-    {#        {% endfor %}#}
-    {#    </div>#}
-
-    {#    <form method="post" action="{% url 'add_comment' article.pk %}">#}
-    {#        {% csrf_token %}#}
-    {#        <div class="form-group">#}
-    {#            <label for="{{ comment_form.article_text.id_for_label }}">Add Comment:</label>#}
-    {#            {{ comment_form.article_text }}#}
-    {#        </div>#}
-    {#        <button type="submit" class="btn btn-primary">Post Comment</button>#}
-    {#    </form>#}
 </div>
 {% endblock %}

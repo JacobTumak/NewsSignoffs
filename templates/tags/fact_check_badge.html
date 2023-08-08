@@ -1,12 +1,1 @@
-{% if article.fact_checked == 'accurate' %}
-<span class="badge bg-success">Accurate</span>
-{% elif article.fact_checked == 'inaccurate' %}
-<span class="badge bg-danger">Inaccurate</span>
-{% elif article.fact_checked == 'needs_revision' %}
-<span class="badge bg-warning">Needs Revision</span>
-{% else %}
-<span class="badge bg-success text-white" style="font-size: 0.33em;vertical-align: top;">Not Fact Checked</span>
-{#<form method="POST" action="{% url 'request_fact_check' article %}">#}
-{#    <button name="request_fact_check" class="btn btn-primary">Submit Fact Check Request For This Article</button>#}
-{#</form>#}
-{% endif %}
+<span class="{{ class }}" style="{{ style }}">{{ result }}</span>

@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'article',
+    'editor_app',
     'signoffs',
     "signoffs.contrib.signets",
     "signoffs.contrib.approvals",

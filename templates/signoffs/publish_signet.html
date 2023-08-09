@@ -18,7 +18,7 @@
                 </span>
             </span>
             {% if is_revokable %}
-            <a class="revoke-button" type="button" title="Revoke this signoff" href="{{ signoff.urls_get_revoke_url }}">
+            <a class="revoke-button" type="button" title="Revoke this signoff" href="{{ signoff.urls.get_revoke_url }}">
                 <small class="px-2">X</small>
             </a>
             {% endif %}

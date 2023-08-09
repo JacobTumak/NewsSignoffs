@@ -22,3 +22,9 @@ class CommentForm(ModelForm):
     class Meta:
         model = Comment
         fields = ['comment_text']
+        widgets = {
+            'comment_text': Textarea(attrs={'rows': 5,
+                                            'class': 'rounded border-light p-3',
+                                            'style': 'width:100%',
+                                            'placeholder': 'Share your thoughts...'}),
+        }

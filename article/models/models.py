@@ -4,7 +4,9 @@ from django.contrib.auth.models import User
 from signoffs.models import Signet, SignoffField, SignoffSingle
 from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
 
+from signoffs.models import SignoffField, SignoffSingle
 from article.signoffs import publish_article_signoff
+from article.approvals import publication_request_signoff, publication_approval_signoff
 
 
 class Article(models.Model):

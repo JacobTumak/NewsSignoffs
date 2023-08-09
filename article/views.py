@@ -4,11 +4,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
 
-from signoffs.shortcuts import get_signoff_or_404
+from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
-from article.models.models import Article #, Comment
+from article.models.models import Article, Comment, comment_signoff
 from article.signoffs import terms_signoff, newsletter_signoff
-from article.forms import ArticleForm, SignupForm
+from article.forms import ArticleForm, CommentForm, SignupForm
 
 
 def terms_check(user):
@@ -64,8 +64,35 @@ def edit_article_view(request, article_id):
 
 
 def article_detail_view(request, article_id):
+    user = request.user
+
     article = Article.objects.get(id=article_id)
-    return render(request, 'article/article_detail.html', {'article': article})
+    past_comments = Comment.objects.filter(article=article)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        signoff_form = Comment.comment_signoff.forms.get_signoff_form(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = user
+            comment.article = article
+            comment.comment_signoff.create(user)
+            comment.save()
+            return redirect('article_detail', article.id)
+        else:
+            messages.error(request, "You must agree to the terms before posting your comment.")
+    else:
+        form = CommentForm()
+
+    context = {'article': article, 'form': form, 'past_comments': past_comments}
+    return render(request, 'article/article_detail.html', context)
+
+
+def revoke_comment_view(request, signet_id):
+    comment = get_signet_or_404(comment_signoff, signet_id).comment
+    comment.delete()
+
+    return redirect(request.META.get('HTTP_REFERER', 'all_articles'))
 
 
 def delete_article_view(request, article_id):

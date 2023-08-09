@@ -19,10 +19,3 @@ publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff'
                                                                            form_context=dict(submit_label='Publish Article',
                                                                                              help_text='Publishing will make this article viewable to everyone.',
                                                     )))
-
-
-# from signoffs.forms import SignoffFormsManager, AbstractSignoffForm
-
-# class AgreeSignoffForm(AbstractSignoffForm):
-#     """ Require the user to signoff for the form to validate """
-#     signed_off = BooleanField(label='I agree', required=True)

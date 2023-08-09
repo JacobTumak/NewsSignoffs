@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from signoffs.models import SignoffField, ApprovalField
+from signoffs.signoffs import SimpleSignoff, SignoffUrlsManager
+from signoffs.models import Signet, SignoffField, ApprovalField, SignoffSingle
 
 from article.signoffs import publish_article_signoff
 from article.approvals import publication_request_signoff, publication_approval_signoff
@@ -43,12 +44,21 @@ class Article(models.Model):
             return self.author.username
 
 
-# class Comment(models.Model):
-#     author = models.ForeignKey(User, on_delete=models.CASCADE)
-#     comment_text = models.TextField(max_length=250, default='Comment text')
-#     likes = models.ManyToManyField(User, related_name='comment_likes')
-#     def __str__(self):
-#         return f"comment - {self.author.username}'"
-#
-#     def total_likes(self):
-#         return self.likes.count()
+class Comment(models.Model):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    comment_text = models.TextField(max_length=250)
+
+    comment_signoff = SignoffSingle('comment_signoff')
+
+    def __str__(self):
+        return f"Comment by {self.author.username} on {self.article.title}"
+
+
+class CommentSignet(Signet):
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='signatories')
+
+
+comment_signoff = SimpleSignoff.register(id='comment_signoff',
+                                         signetModel=CommentSignet,
+                                         urls=SignoffUrlsManager(revoke_url_name='revoke_comment'))

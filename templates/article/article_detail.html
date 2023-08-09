@@ -16,7 +16,7 @@
         <p><strong>Article:</strong><br>{{ article.article_text }}</p>
     </div>
 
-    <div class="interaction-buttons">
+    <div class="interaction-buttons pb-5">
         {% if request.user != article.author %}
             <form method="post" action="{% url 'like_article' article.pk %}">
                 {% csrf_token %}
@@ -41,6 +41,8 @@
                 </form>
             </div>
         {% endif %}
+    </div>
+
     {#        <br>#}
     {#        <form method="post" action="{% url 'save_article' article.pk %}">#}
     {#            {% csrf_token %}#}
@@ -53,23 +55,24 @@
     {#                ({{ article.total_saves }})#}
     {#            </button>#}
     {#        </form>#}
+
+
+    <div class="comments-section pb-3">
+        <h3>Comments</h3>
+        {% for comment in past_comments %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <p class="card-text">{{ comment.comment_text }}</p>
+                {% render_signoff comment.comment_signoff.get "signet" %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
 
-    {#    <div class="comments-section">#}
-    {#        <h3>Comments</h3>#}
-    {#        {% for comment in article.comment_set.all %}#}
-    {#            <p>{{ comment.article_text }}</p>#}
-    {#            <p>Comment by: {{ comment.author.get_full_name|default:comment.author.username }}</p>#}
-    {#        {% endfor %}#}
-    {#    </div>#}
-
-    {#    <form method="post" action="{% url 'add_comment' article.pk %}">#}
-    {#        {% csrf_token %}#}
-    {#        <div class="form-group">#}
-    {#            <label for="{{ comment_form.article_text.id_for_label }}">Add Comment:</label>#}
-    {#            {{ comment_form.article_text }}#}
-    {#        </div>#}
-    {#        <button type="submit" class="btn btn-primary">Post Comment</button>#}
-    {#    </form>#}
+    <form method="post">
+        {% csrf_token %}
+        {{ form }}
+        <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
 </div>
 {% endblock %}

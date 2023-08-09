@@ -3,18 +3,17 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
-from signoffs.shortcuts import get_signoff_or_404
-from article.models.models import Article
-from article.signoffs import terms_signoff, newsletter_signoff
-from article.forms import ArticleForm, SignupForm
-from signoffs.models import Signet
 
-def terms_check(user): # FIXME
-    try:
-        signoff= terms_signoff.get(user=user)
-        return signoff.is_signed()
-    except Signet.MultipleObjectsReturned:
-        return True
+from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
+
+from article.models.models import Article, Comment, comment_signoff
+from article.signoffs import terms_signoff, newsletter_signoff
+from article.forms import ArticleForm, CommentForm, SignupForm
+
+
+def terms_check(user):
+    signoff = terms_signoff.get(user=user)
+    return signoff.is_signed()
 
 
 @login_required
@@ -54,6 +53,35 @@ def edit_article_view(request, article_id):
         form = ArticleForm(instance=article)
     return render(request, 'article/edit_article.html', {'form': form, 'article': article})
 
+
+def article_detail_view(request, article_id):
+    user = request.user
+
+    article = Article.objects.get(id=article_id)
+    past_comments = Comment.objects.filter(article=article)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = user
+            comment.article = article
+            comment.comment_signoff.create(user)
+            comment.save()
+            return redirect('article_detail', article.id)
+        else:
+            messages.error(request, "You must agree to the terms before posting your comment.")
+    else:
+        form = CommentForm()
+
+    context = {'article': article, 'form': form, 'past_comments': past_comments}
+    return render(request, 'article/article_detail.html', context)
+
+
+def revoke_comment_view(request, signet_id):
+    comment = get_signet_or_404(comment_signoff, signet_id).comment
+    comment.delete()
+    return redirect(request.META.get('HTTP_REFERER', 'all_articles'))
 
 
 @login_required
@@ -122,6 +150,6 @@ def newsletter_view(request):
 
 def revoke_newsletter_view(request, signet_id):
     signoff = get_signoff_or_404(newsletter_signoff, signet_id)
-    signoff.revoke_if_permitted(user=request.user)
+    signoff.revoke_if_permitted(user=request.user, reason='I no longer wish to receive the newsletter.')
 
     return redirect('newsletter')

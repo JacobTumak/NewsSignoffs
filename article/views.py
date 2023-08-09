@@ -1,26 +1,23 @@
 from django.contrib import messages
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
 
-from signoffs.contrib.signets.models import Signet
+from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
-from article.models import Article #, Comment
-from article.signoffs import terms_signoff
-from article.forms import ArticleForm, SignupForm
-
-
-#################
-# ARTICLE VIEWS #
-#################
+from article.models.models import Article, Comment, comment_signoff
+from article.signoffs import terms_signoff, newsletter_signoff
+from article.forms import ArticleForm, CommentForm, SignupForm
 
 
-def redirect_to_home(request):
-    return redirect('all_articles')
+def terms_check(user):
+    signoff = terms_signoff.get(user=user)
+    return signoff.is_signed()
 
 
 @login_required
+@user_passes_test(terms_check, login_url='terms_of_service')
 def new_article_view(request):
     user = request.user
 
@@ -42,7 +39,7 @@ def new_article_view(request):
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
 
 
-@login_required()
+@login_required
 def edit_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
     if request.method == 'POST':
@@ -58,31 +55,33 @@ def edit_article_view(request, article_id):
 
 
 def article_detail_view(request, article_id):
+    user = request.user
+
     article = Article.objects.get(id=article_id)
-    return render(request, 'article/article_detail.html', {'article': article})
+    past_comments = Comment.objects.filter(article=article)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = user
+            comment.article = article
+            comment.comment_signoff.create(user)
+            comment.save()
+            return redirect('article_detail', article.id)
+        else:
+            messages.error(request, "You must agree to the terms before posting your comment.")
+    else:
+        form = CommentForm()
+
+    context = {'article': article, 'form': form, 'past_comments': past_comments}
+    return render(request, 'article/article_detail.html', context)
 
 
-def delete_article_view(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
-    article.delete()
-    return HttpResponseRedirect(reverse('my_articles'))
-
-
-@login_required
-def my_articles_view(request):
-    articles = Article.objects.all().filter(author=request.user)
-    return render(request, 'article/my_articles.html', {'articles': articles})
-
-
-def all_articles_view(request):
-    articles = Article.objects.all()
-    return render(request, 'article/all_articles.html', {'articles': articles})
-
-
-@login_required
-def all_liked_articles_view(request):
-    articles = Article.objects.all().filter(likes=request.user)
-    return render(request, 'article/liked_articles.html', {'articles': articles})
+def revoke_comment_view(request, signet_id):
+    comment = get_signet_or_404(comment_signoff, signet_id).comment
+    comment.delete()
+    return redirect(request.META.get('HTTP_REFERER', 'all_articles'))
 
 
 @login_required
@@ -93,15 +92,6 @@ def like_article_view(request, article_id):
     else:
         article.likes.add(request.user)
     return HttpResponseRedirect(reverse('article_detail', args=[str(article_id)]))
-
-
-def custom_profile_redirect(request):
-    return redirect('my_articles')
-
-
-def custom_logout(request):
-    logout(request)
-    return redirect('all_articles')  # Replace 'home' with the URL name of your homepage view
 
 
 def signup_view(request):
@@ -127,28 +117,39 @@ def signup_view(request):
 
 def terms_of_service_view(request):
     user = request.user
+    next_page = request.GET.get('next') or 'terms_of_service'
 
-    try:
-        signoff = Signet.objects.get(signoff_id='terms_signoff', user=user).signoff
-    except:
-        signoff = terms_signoff()
+    signoff = terms_signoff.get(user=user)
 
     if request.method == 'POST':
         signoff_form = signoff.forms.get_signoff_form(request.POST)
         if signoff_form.is_signed_off():
             signoff.sign(user)
-            return redirect('my_articles')
+            return redirect(next_page)
         else:
             messages.error(request, "You must agree to the Terms of Service.")
 
     return render(request, 'registration/terms_of_service.html', {'signoff': signoff})
 
 
-# @login_required
-# def save_article_view(request, article_id):
-#     article = get_object_or_404(Article, id=article_id)
-#     if request.user in article.saves.all():
-#         article.saves.remove(request.user)
-#     else:
-#         article.saves.add(request.user)
-#     return HttpResponseRedirect(reverse('article_detail', args=[str(article_id)]))
+def newsletter_view(request):
+    user = request.user
+
+    signoff = newsletter_signoff.get(user=user)
+
+    if request.method == 'POST':
+        signoff_form = signoff.forms.get_signoff_form(request.POST)
+        if signoff_form.is_signed_off():
+            signoff.sign(user)
+            return redirect('newsletter')
+        else:
+            messages.error(request, "You must check the box to sign up for our newsletter.")
+
+    return render(request, 'registration/newsletter.html', {'signoff': signoff})
+
+
+def revoke_newsletter_view(request, signet_id):
+    signoff = get_signoff_or_404(newsletter_signoff, signet_id)
+    signoff.revoke_if_permitted(user=request.user, reason='I no longer wish to receive the newsletter.')
+
+    return redirect('newsletter')

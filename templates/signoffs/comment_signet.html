@@ -1,5 +1,5 @@
 {% if signoff.is_signed %}
-    <div class="signoffs signet {% if is_revokable %}revokable{% endif %}">
+    <div class="d-flex justify-content-end signoffs signet {% if is_revokable %}revokable{% endif %}">
         <div class="signet-field-group">
             <span class="sigil">
                 <span class="signet-field-label">
@@ -18,7 +18,7 @@
                 </span>
             </span>
             {% if is_revokable and request.user == signoff.signatory %}
-            <a class="revoke-button" type="button" title="Revoke this signoff" href="{{ signoff.urls.get_revoke_url }}">
+            <a class="revoke-button" type="button" title="Delete this comment" href="{{ signoff.urls.get_revoke_url }}">
                 X
             </a>
             {% endif %}

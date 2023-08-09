@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-from signoffs.signoffs import SimpleSignoff, SignoffUrlsManager
+from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
 from signoffs.models import Signet, SignoffField, ApprovalField, SignoffSingle
 
 from article.signoffs import publish_article_signoff
@@ -59,4 +59,6 @@ class CommentSignet(Signet):
 
 comment_signoff = SimpleSignoff.register(id='comment_signoff',
                                          signetModel=CommentSignet,
+                                         sigil_label='Posted by',
+                                         render=SignoffRenderer(signet_template='signoffs/comment_signet.html'),
                                          urls=SignoffUrlsManager(revoke_url_name='revoke_comment'))

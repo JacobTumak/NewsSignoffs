@@ -17,9 +17,9 @@
                     {{ signoff.timestamp|date:"DATE_FORMAT" }}
                 </span>
             </span>
-            {% if is_revokable %}
+            {% if is_revokable and request.user == signoff.signatory %}
             <a class="revoke-button" type="button" title="Revoke this signoff" href="{{ signoff.urls.get_revoke_url }}">
-                <small class="px-2">X</small>
+                X
             </a>
             {% endif %}
         </div>

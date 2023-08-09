@@ -9,6 +9,7 @@ from article.models.models import Article
 def redirect_to_home(request):
     return redirect('all_articles')
 
+
 def custom_profile_redirect(request):
     return redirect('my_articles')
 
@@ -16,11 +17,6 @@ def custom_profile_redirect(request):
 def custom_logout(request):
     logout(request)
     return redirect('all_articles')
-
-
-def article_detail_view(request, article_id):
-    article = Article.objects.get(id=article_id)
-    return render(request, 'article/article_detail.html', {'article': article})
 
 
 def delete_article_view(request, article_id):

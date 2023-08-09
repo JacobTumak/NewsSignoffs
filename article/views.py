@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
 from django.urls import reverse
@@ -62,7 +62,6 @@ def article_detail_view(request, article_id):
 
     if request.method == 'POST':
         form = CommentForm(request.POST)
-        signoff_form = Comment.comment_signoff.forms.get_signoff_form(request.POST)
         if form.is_valid():
             comment = form.save(commit=False)
             comment.author = user
@@ -82,31 +81,7 @@ def article_detail_view(request, article_id):
 def revoke_comment_view(request, signet_id):
     comment = get_signet_or_404(comment_signoff, signet_id).comment
     comment.delete()
-
     return redirect(request.META.get('HTTP_REFERER', 'all_articles'))
-
-
-def delete_article_view(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
-    article.delete()
-    return HttpResponseRedirect(reverse('my_articles'))
-
-
-@login_required
-def my_articles_view(request):
-    articles = Article.objects.all().filter(author=request.user)
-    return render(request, 'article/my_articles.html', {'articles': articles})
-
-
-def all_articles_view(request):
-    articles = Article.objects.all()
-    return render(request, 'article/all_articles.html', {'articles': articles})
-
-
-@login_required
-def all_liked_articles_view(request):
-    articles = Article.objects.all().filter(likes=request.user)
-    return render(request, 'article/liked_articles.html', {'articles': articles})
 
 
 @login_required

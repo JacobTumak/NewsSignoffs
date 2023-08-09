@@ -1,11 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
-from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
-from signoffs.models import Signet, SignoffField, ApprovalField, SignoffSingle
-
+from signoffs.models import SignoffField, SignoffSingle
 from article.signoffs import publish_article_signoff
-from article.approvals import publication_request_signoff, publication_approval_signoff
 
 
 class Article(models.Model):
@@ -52,13 +48,3 @@ class Comment(models.Model):
     def __str__(self):
         return f"Comment by {self.author.username} on {self.article.title}"
 
-
-class CommentSignet(Signet):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='signatories')
-
-
-comment_signoff = SimpleSignoff.register(id='comment_signoff',
-                                         signetModel=CommentSignet,
-                                         sigil_label='Posted by',
-                                         render=SignoffRenderer(signet_template='signoffs/comment_signet.html'),
-                                         urls=SignoffUrlsManager(revoke_url_name='revoke_comment'))

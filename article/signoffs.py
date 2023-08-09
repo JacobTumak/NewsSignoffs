@@ -1,6 +1,7 @@
 from signoffs.signoffs import RevokableSignoff, SignoffRenderer, SignoffUrlsManager
-from signoffs.contrib.signets.signoffs import IrrevokableSignoff
+from signoffs.signoffs import IrrevokableSignoff, SimpleSignoff
 from signoffs.models import Signet
+from article.models import CommentSignet
 
 
 from article.models.signets import RevokedNewsletterSignet
@@ -21,3 +22,9 @@ publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff'
                                                                            form_context=dict(submit_label='Publish Article',
                                                                                              help_text='Publishing will make this article viewable to everyone.',
                                                     )))
+
+comment_signoff = SimpleSignoff.register(id='comment_signoff',
+                                         signetModel=CommentSignet,
+                                         sigil_label='Posted by',
+                                         render=SignoffRenderer(signet_template='signoffs/comment_signet.html'),
+                                         urls=SignoffUrlsManager(revoke_url_name='revoke_comment'))

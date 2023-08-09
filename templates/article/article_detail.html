@@ -59,6 +59,7 @@
 
     <div class="comments-section pb-3">
         <h3>Comments</h3>
+        <hr>
         {% for comment in past_comments %}
         <div class="card mb-3">
             <div class="card-body">
@@ -67,12 +68,15 @@
             </div>
         </div>
         {% endfor %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form }}
+                    <button type="submit" class="btn btn-primary">Post Comment</button>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form }}
-        <button type="submit" class="btn btn-primary">Post Comment</button>
-    </form>
 </div>
 {% endblock %}

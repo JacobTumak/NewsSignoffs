@@ -1,4 +1,4 @@
-from signoffs.signoffs import RevokableSignoff, SignoffRenderer, SignoffUrlsManager
+from signoffs.signoffs import RevokableSignoff, SignoffRenderer, SignoffUrlsManager, SimpleSignoff
 from signoffs.contrib.signets.signoffs import IrrevokableSignoff
 from signoffs.models import Signet
 
@@ -21,3 +21,5 @@ publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff'
                                                                            form_context=dict(submit_label='Publish Article',
                                                                                              help_text='Publishing will make this article viewable to everyone.',
                                                     )))
+
+

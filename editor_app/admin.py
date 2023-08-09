@@ -1,6 +1,4 @@
 from django.contrib import admin
-from editor_app.models import Project, Stamp, ApprovalSignet
+from editor_app.models import Project
 
 admin.site.register(Project)
-admin.site.register(Stamp)
-admin.site.register(ApprovalSignet)

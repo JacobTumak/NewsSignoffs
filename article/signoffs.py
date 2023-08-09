@@ -1,4 +1,4 @@
-from signoffs.signoffs import RevokableSignoff, SignoffRenderer, SignoffUrlsManager, SimpleSignoff
+from signoffs.signoffs import RevokableSignoff, SignoffRenderer, SignoffUrlsManager
 from signoffs.contrib.signets.signoffs import IrrevokableSignoff
 from signoffs.models import Signet
 

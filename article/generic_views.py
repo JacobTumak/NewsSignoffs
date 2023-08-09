@@ -31,25 +31,33 @@ def delete_article_view(request, article_id):
 
 @login_required
 def my_articles_view(request):
-    articles = Article.objects.all().filter(author=request.user)
-    context = {'articles': articles,
-               'page_title': 'My Articles',
-               "empty_text": "You haven't written any articles yet."}
-    return render(request, 'article/article_list_view.html', context=context)
+    return article_list_base_view(request,
+                                  page_title="My Articles",
+                                  empty_text="You haven't written any articles yet.",
+                                  author=request.user)
 
 
 def all_articles_view(request):
-    articles = Article.objects.all()
-    context = {'articles': articles,
-               'page_title': 'All Articles',
-               "empty_text": "Published articles will appear here."}
-    return render(request, 'article/article_list_view.html', context=context)
+    return article_list_base_view(request,
+                                  page_title="All Articles",
+                                  empty_text="Published articles will appear here.")
 
 
 @login_required
 def all_liked_articles_view(request):
-    articles = Article.objects.filter(signatories__user=request.user)
+    return article_list_base_view(request,
+                                  page_title="Liked Articles",
+                                  empty_text="Articles you like will appear here.",
+                                  signatories__user=request.user)
+
+
+def article_list_base_view(request, page_title=None, empty_text=None, **filter_kwargs):
+    empty_text = empty_text or "Published articles will appear here."
+    if filter_kwargs:
+        articles = Article.objects.filter(**filter_kwargs)
+    else:
+        articles = Article.objects.all()
     context = {'articles': articles,
-               'page_title': 'Liked Articles',
-               "empty_text": "Articles you like will appear here."}
+               'page_title': page_title,
+               "empty_text": empty_text}
     return render(request, 'article/article_list_view.html', context=context)

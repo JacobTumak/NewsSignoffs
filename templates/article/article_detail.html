@@ -30,32 +30,16 @@
                 </button>
             </form>
         {% else %}
-            <div class="btn-group" role="group">
-                <form method="get" action="{% url 'edit_article' article.pk %}">
-                    <button type="submit" class="btn btn-primary">Edit Article</button>
-                </form>
-                <div class="mx-2"></div>
-                <form method="post" action="{% url 'delete_article' article.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Delete Article</button>
-                </form>
+            <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group" role="group">
+                    <a class="btn btn-primary" href="{% url 'edit_article' article.id %}">Edit Article</a>
+                </div>
+                <div class="btn-group ms-2" role="group">
+                    <a class="btn btn-danger" href="{% url 'delete_article' article.id %}">Delete Article</a>
+                </div>
             </div>
         {% endif %}
     </div>
-
-    {#        <br>#}
-    {#        <form method="post" action="{% url 'save_article' article.pk %}">#}
-    {#            {% csrf_token %}#}
-    {#            <button type="submit" class="btn btn-secondary">#}
-    {#                {% if request.user in article.saves.all %}#}
-    {#                    Unsave#}
-    {#                {% else %}#}
-    {#                    Save#}
-    {#                {% endif %}#}
-    {#                ({{ article.total_saves }})#}
-    {#            </button>#}
-    {#        </form>#}
-
 
     <div class="comments-section pb-3">
         <h3>Comments</h3>

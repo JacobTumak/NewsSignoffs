@@ -2,10 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 
 from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
-from signoffs.models import Signet, SignoffField, ApprovalField, SignoffSingle
+from signoffs.models import Signet, SignoffField, SignoffSingle, SignoffSet
 
 from article.signoffs import publish_article_signoff
-from article.approvals import publication_request_signoff, publication_approval_signoff
 
 
 class Article(models.Model):
@@ -13,9 +12,10 @@ class Article(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='article_author')
     summary = models.TextField(max_length=100, null=False, blank=False)
     article_text = models.TextField(max_length=1000,)
-    likes = models.ManyToManyField(User, related_name='article_likes')
 
     publish_signoff, publish_signet = SignoffField(publish_article_signoff)
+
+    likes = SignoffSet('like_signoff')
 
     def __str__(self):
         if self.author.get_full_name() != "":
@@ -31,8 +31,8 @@ class Article(models.Model):
         return self.likes.count()
 
     def is_author(self, user=None, username=None):
-        if user==None and username==None:
-            raise ValueError("Either user or username must be provided")
+        if user is None and username is None:
+            raise ValueError("Either user or username must be provided.")
         return self.author == user or self.author.username == username
 
     def get_author_name(self):
@@ -40,6 +40,17 @@ class Article(models.Model):
             return self.author.get_full_name()
         else:
             return self.author.username
+
+
+class LikeSignet(Signet):
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='signatories')
+
+
+like_signoff = SimpleSignoff.register(id='like_signoff',
+                                      signetModel=LikeSignet,
+                                      sigil_label='Liked by',)
+                                      # render=SignoffRenderer(signet_template='signoffs/like_signet.html'),
+                                      # urls=SignoffUrlsManager(revoke_url_name='revoke_like'))
 
 
 class Comment(models.Model):

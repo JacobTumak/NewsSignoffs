@@ -4,9 +4,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
-from signoffs.models import Signet
 
-from article.models.models import Article, Comment, comment_signoff
+from article.models.models import Article, LikeSignet, Comment, comment_signoff
 from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, CommentForm, SignupForm
 
@@ -93,17 +92,12 @@ def like_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
 
     if article.likes.has_signed(user=user):
-        like = Signet.objects.get(signoff_id='like_signoff', user=user).signoff
+        like = LikeSignet.objects.get(signoff_id='like_signoff', article=article, user=user).signoff
         like.revoke_if_permitted(user=user)
     else:
         article.likes.create(user=user)
 
     return redirect('article_detail', article.id)
-
-
-def article_likes_view(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
-    return render(request, 'article/article_likes.html', {'article': article})
 
 
 def signup_view(request):

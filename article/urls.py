@@ -17,7 +17,6 @@ urlpatterns = [
     path('edit-article/<int:article_id>/', views.edit_article_view, name='edit_article'),
     path('like-article/<int:article_id>/', views.like_article_view, name='like_article'),
     path('article-detail/<int:article_id>/', views.article_detail_view, name='article_detail'),
-    path('article-detail/<int:article_id>/likes/', views.article_likes_view, name='article_likes'),
     path('article-detail/revoke/<int:signet_id>/', views.revoke_comment_view, name='revoke_comment'),
 
     path('all-articles/', generic_views.all_articles_view, name='all_articles'),

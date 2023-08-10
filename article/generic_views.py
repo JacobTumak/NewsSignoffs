@@ -9,7 +9,8 @@ def redirect_to_home(request):
 
 
 def custom_profile_redirect(request):
-    return redirect('my_articles')
+    user = request.user
+    return redirect('user_profile', user.username)
 
 
 def custom_logout(request):
@@ -17,6 +18,7 @@ def custom_logout(request):
     return redirect('all_articles')
 
 
+@login_required
 def delete_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
 
@@ -46,7 +48,7 @@ def all_articles_view(request):
 
 @login_required
 def all_liked_articles_view(request):
-    articles = Article.objects.all().filter(likes=request.user)
+    articles = Article.objects.filter(signatories__user=request.user)
     context = {'articles': articles,
                'page_title': 'Liked Articles',
                "empty_text": "Articles you like will appear here."}

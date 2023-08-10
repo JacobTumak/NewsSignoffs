@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load signoff_tags %}
+
+{% block title %}Likes for {{ article.title }} - Powderflask News{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <h1>{{ article.title }} by {{ article.author }} has {{ article.total_likes }} {% if article.total_likes == 1 %}like{% else %}likes{% endif %}</h1>
+        <hr>
+
+        {% if article.total_likes == 0 %}
+        <p>This article hasn't received any likes yet!</p>
+        {% endif %}
+
+        {% for like in article.likes.all %}
+        <div class="card bg-light mb-3">
+            <div class="card-body">
+                {% render_signoff like %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

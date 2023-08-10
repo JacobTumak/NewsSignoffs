@@ -1,8 +1,6 @@
-
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
-from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, redirect
 from article.models.models import Article
 
 
@@ -21,8 +19,12 @@ def custom_logout(request):
 
 def delete_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
-    article.delete()
-    return HttpResponseRedirect(reverse('my_articles'))
+
+    if request.method == 'POST':
+        article.delete()
+        return redirect('my_articles')
+    else:
+        return render(request, 'article/delete_article.html', {'article': article})
 
 
 @login_required

@@ -1,12 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, HttpResponseRedirect, get_object_or_404, redirect
-from django.urls import reverse
+from django.shortcuts import render, get_object_or_404, redirect
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
-from article.models.models import Article, Comment, comment_signoff
+from article.models.models import Article, LikeSignet, Comment, comment_signoff
 from article.signoffs import terms_signoff, newsletter_signoff
 from article.forms import ArticleForm, CommentForm, SignupForm
 
@@ -42,15 +41,17 @@ def new_article_view(request):
 @login_required
 def edit_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
+
     if request.method == 'POST':
         form = ArticleForm(request.POST, instance=article)
         if form.is_valid():
             article = form.save(commit=False)
             article.author = request.user
             article.save()
-            return render(request, 'article/article_detail.html', context={'article': article})
+            return redirect('article_detail', article.id)
     else:
         form = ArticleForm(instance=article)
+
     return render(request, 'article/edit_article.html', {'form': form, 'article': article})
 
 
@@ -58,6 +59,7 @@ def article_detail_view(request, article_id):
     user = request.user
 
     article = Article.objects.get(id=article_id)
+    has_liked = article.likes.has_signed(user=user)  # Returns true iff the user has liked the article
     past_comments = Comment.objects.filter(article=article)
 
     if request.method == 'POST':
@@ -74,7 +76,7 @@ def article_detail_view(request, article_id):
     else:
         form = CommentForm()
 
-    context = {'article': article, 'form': form, 'past_comments': past_comments}
+    context = {'article': article, 'form': form, 'user_has_liked': has_liked, 'past_comments': past_comments}
     return render(request, 'article/article_detail.html', context)
 
 
@@ -86,12 +88,16 @@ def revoke_comment_view(request, signet_id):
 
 @login_required
 def like_article_view(request, article_id):
+    user = request.user
     article = get_object_or_404(Article, id=article_id)
-    if request.user in article.likes.all():
-        article.likes.remove(request.user)
+
+    if article.likes.has_signed(user=user):
+        like = LikeSignet.objects.get(signoff_id='like_signoff', article=article, user=user).signoff
+        like.revoke_if_permitted(user=user)
     else:
-        article.likes.add(request.user)
-    return HttpResponseRedirect(reverse('article_detail', args=[str(article_id)]))
+        article.likes.create(user=user)
+
+    return redirect('article_detail', article.id)
 
 
 def signup_view(request):

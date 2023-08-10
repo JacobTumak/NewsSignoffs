@@ -21,3 +21,5 @@ publish_article_signoff = RevokableSignoff.register(id='publish_article_signoff'
                                                                            form_context=dict(submit_label='Publish Article',
                                                                                              help_text='Publishing will make this article viewable to everyone.',
                                                     )))
+
+

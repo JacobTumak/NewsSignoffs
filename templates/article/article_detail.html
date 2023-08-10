@@ -18,44 +18,74 @@
 
     <div class="interaction-buttons pb-5">
         {% if request.user != article.author %}
-            <form method="post" action="{% url 'like_article' article.pk %}">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-primary">
-                    {% if request.user in article.likes.all %}
-                        Unlike
-                    {% else %}
-                        Like
-                    {% endif %}
-                    ({{ article.total_likes }})
-                </button>
-            </form>
+            <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group" role="group">
+                    <a class="btn btn-primary" href="{% url 'like_article' article.pk %}">
+                        {% if user_has_liked %}
+                            Unlike
+                        {% else %}
+                            Like
+                        {% endif %}
+                    </a>
+                </div>
+                {% if article.total_likes > 0 %}
+                <div class="btn-group ms-auto" role="group">
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#likes" aria-expanded="false" aria-controls="collapseExample">
+                        Show / Hide Likes ({{ article.total_likes }})
+                    </button>
+                </div>
+                {% endif %}
+            </div>
         {% else %}
-            <div class="btn-group" role="group">
-                <form method="get" action="{% url 'edit_article' article.pk %}">
-                    <button type="submit" class="btn btn-primary">Edit Article</button>
-                </form>
-                <div class="mx-2"></div>
-                <form method="post" action="{% url 'delete_article' article.pk %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Delete Article</button>
-                </form>
+            <div class="btn-toolbar" role="toolbar">
+                <div class="btn-group" role="group">
+                    <a class="btn btn-primary" href="{% url 'edit_article' article.id %}">Edit Article</a>
+                </div>
+                <div class="btn-group ms-2" role="group">
+                    <a class="btn btn-danger" href="{% url 'delete_article' article.id %}">Delete Article</a>
+                </div>
+                {% if article.total_likes > 0 %}
+                <div class="btn-group ms-auto" role="group">
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#likes" aria-expanded="false" aria-controls="collapseExample">
+                        Show / Hide Likes ({{ article.total_likes }})
+                    </button>
+                </div>
+                {% endif %}
             </div>
         {% endif %}
     </div>
 
-    {#        <br>#}
-    {#        <form method="post" action="{% url 'save_article' article.pk %}">#}
-    {#            {% csrf_token %}#}
-    {#            <button type="submit" class="btn btn-secondary">#}
-    {#                {% if request.user in article.saves.all %}#}
-    {#                    Unsave#}
-    {#                {% else %}#}
-    {#                    Save#}
-    {#                {% endif %}#}
-    {#                ({{ article.total_saves }})#}
-    {#            </button>#}
-    {#        </form>#}
-
+    <div class="collapse" id="likes">
+        <div class="mb-5">
+            <div>
+                <h5>
+                    {% if user_has_liked %}
+                        {% if article.total_likes == 1 %}
+                            You're the first person to like this article!
+                        {% elif article.total_likes == 2 %}
+                            You and 1 other person like this article!
+                        {% elif article.total_likes > 2 %}
+                            You and {{ article.total_likes|add:"-1" }} other people like this article!
+                        {% endif %}
+                    {% else %}
+                        {% if article.total_likes == 1 %}
+                            1 person likes this article!
+                        {% elif article.total_likes >= 2 %}
+                            {{ article.total_likes }} people like this article!
+                        {% endif %}
+                    {% endif %}
+                </h5>
+                <hr>
+            </div>
+            {% for like in article.likes.all %}
+            <div class="card bg-light mb-3">
+                <div class="card-body">
+                    {% render_signoff like %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
 
     <div class="comments-section pb-3">
         <h3>Comments</h3>

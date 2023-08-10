@@ -60,7 +60,7 @@ def article_detail_view(request, article_id):
     user = request.user
 
     article = Article.objects.get(id=article_id)
-    liked = article.likes.has_signed(user=user)
+    has_liked = article.likes.has_signed(user=user)  # Returns true iff the user has liked the article
     past_comments = Comment.objects.filter(article=article)
 
     if request.method == 'POST':
@@ -77,7 +77,7 @@ def article_detail_view(request, article_id):
     else:
         form = CommentForm()
 
-    context = {'article': article, 'form': form, 'liked': liked, 'past_comments': past_comments}
+    context = {'article': article, 'form': form, 'user_has_liked': has_liked, 'past_comments': past_comments}
     return render(request, 'article/article_detail.html', context)
 
 
@@ -99,6 +99,11 @@ def like_article_view(request, article_id):
         article.likes.create(user=user)
 
     return redirect('article_detail', article.id)
+
+
+def article_likes_view(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+    return render(request, 'article/article_likes.html', {'article': article})
 
 
 def signup_view(request):

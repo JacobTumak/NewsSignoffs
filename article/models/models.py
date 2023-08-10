@@ -48,9 +48,8 @@ class LikeSignet(Signet):
 
 like_signoff = SimpleSignoff.register(id='like_signoff',
                                       signetModel=LikeSignet,
-                                      sigil_label='Liked by',)
-                                      # render=SignoffRenderer(signet_template='signoffs/like_signet.html'),
-                                      # urls=SignoffUrlsManager(revoke_url_name='revoke_like'))
+                                      sigil_label='Liked by',
+                                      render=SignoffRenderer(signet_template='signoffs/like_signet.html'))
 
 
 class Comment(models.Model):

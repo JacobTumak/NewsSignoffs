@@ -21,7 +21,7 @@
             <form method="post" action="{% url 'like_article' article.pk %}">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-primary">
-                    {% if request.user in article.likes.all %}
+                    {% if liked %}
                         Unlike
                     {% else %}
                         Like

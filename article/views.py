@@ -128,14 +128,14 @@ def user_profile_view(request, username):
     newsletter_so = newsletter_signoff.get(user=user)
     verified_so = None
 
-    drafts = Article.objects.filter(author=user)
+    # drafts = Article.objects.filter(author=user)
     my_articles = Article.objects.filter(author=user)
     liked_articles = Article.objects.filter(signatories__user=user)
 
     context = {'terms_so': terms_so,
                'newsletter_so': newsletter_so,
                'verified_so': verified_so,
-               'drafts': drafts,
+               # 'drafts': drafts,
                'my_articles': my_articles,
                'liked_articles': liked_articles}
     return render(request, 'registration/user_profile.html', context)

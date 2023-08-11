@@ -48,22 +48,22 @@
         </table>
     </div>
 
-    {% if drafts|length > 0 %}
-    <div class="my-drafts mb-5">
-        <h3>My Drafts ({{ drafts|length }}) </h3>
-        <hr>
-
-        {% for draft in drafts %}
-        <div class="card mb-3">
-            <div class="card-body">
-                <h5 class="card-title">{{ draft.title }}</h5>
-                <p class="card-text">{{ draft.summary }}</p>
-                <a href="{% url 'article_detail' article_id=draft.id %}" class="btn btn-primary">Read More</a>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-    {% endif %}
+{#    {% if drafts|length > 0 %}#}
+{#    <div class="my-drafts mb-5">#}
+{#        <h3>My Drafts ({{ drafts|length }}) </h3>#}
+{#        <hr>#}
+{##}
+{#        {% for draft in drafts %}#}
+{#        <div class="card mb-3">#}
+{#            <div class="card-body">#}
+{#                <h5 class="card-title">{{ draft.title }}</h5>#}
+{#                <p class="card-text">{{ draft.summary }}</p>#}
+{#                <a href="{% url 'article_detail' article_id=draft.id %}" class="btn btn-primary">Read More</a>#}
+{#            </div>#}
+{#        </div>#}
+{#        {% endfor %}#}
+{#    </div>#}
+{#    {% endif %}#}
 
     <div class="my-articles mb-5">
         <h3>My Articles ({{ my_articles|length }})</h3>

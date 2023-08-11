@@ -64,7 +64,8 @@ class Comment(models.Model):
 
 
 class CommentSignet(Signet):
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='signatories')
+    # ForeignKey(unique=True) is usually better served by a OneToOneField
+    comment = models.ForeignKey(Comment, unique=True, on_delete=models.CASCADE, related_name='signatories')
 
 
 comment_signoff = SimpleSignoff.register(id='comment_signoff',

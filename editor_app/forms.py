@@ -1,13 +1,19 @@
-from django.forms import ModelForm
+from django.forms import ModelForm, TextInput, Textarea, HiddenInput
 from signoffs.forms import ApprovalSignoffForm
 from signoffs.models import ApprovalSignet
-import editor_app.models as models
+from editor_app.models.models import Assignment
 from editor_app import approvals
 
-class ProjectForm(ModelForm):
+class AssignmentForm(ModelForm):
     class Meta:
-        model = models.Project
-        fields = ['project_name', 'details', 'assigned_to']
+        model = Assignment
+        fields = ['assignment_name', 'assigned_to', 'details']
+        hidden = ['assigned_by']
+        widgets = {
+            'assignment_name': TextInput(attrs={'style': 'width:75%'}),
+            'details': Textarea(attrs={'rows': 4, 'style': 'width:100%'}),
+            'assigned_by': HiddenInput()
+        }
 
 
 # class NewProjectApprovalForm(ApprovalSignoffForm):

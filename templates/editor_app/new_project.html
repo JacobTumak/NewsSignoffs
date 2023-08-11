@@ -10,14 +10,11 @@
         <form name="new_project" method="POST" action="{% url "project_detail" %}">
             {% csrf_token %}
             {{ project_form.as_p }}
-            {{ approval_form.as_p }}
-            {{ approval_form.errors }}
-            {{ approval_form.non_field_errors }}
-            <button type="submit">Assign Project</button>
+            <div class="signoffs approval-panels">
+              {% render_approval approval_form show_revoke=True %}
+            </div>
+{#            <button type="submit">Assign Project</button>#}
         </form>
     </div>
-{#    <div class="signoffs">#}
-{#        {% render_approval project_form.editor_approval %}#}
-{#    </div>#}
 </body>
 </html>

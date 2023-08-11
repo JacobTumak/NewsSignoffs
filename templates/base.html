@@ -30,6 +30,17 @@
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Assignments
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'my_assignments' %}">All Assignments</a></li>
+                            <li><a class="dropdown-item" href="{% url 'all_assignments' %}">My Assignments</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <a class="dropdown-item" href="{% url 'fake_new_assignment' %}">New Assignment</a>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             {{ user }}
                         </a>
                         <ul class="dropdown-menu">

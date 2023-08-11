@@ -1,10 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load signoff_tags %}
 
-</body>
-</html>
+{% block title %}Assignment Details - Powderflask News{% endblock %}
+
+{% block content %}
+<div class="col-md-8 offset-md-2">
+    <div class="article-detail pb-3">
+        <h1>{{ assignment.assignment_name }}</h1>
+        <hr>
+        <p><strong>Assigned To:</strong><br>{{ assignment.assignee }}</p>
+        <p><strong>Assignment Details:</strong><br>{{ assignment.details }}</p>
+    </div>
+    {% if user == assignment.assigned_to %}
+<button class="btn btn-success">Accept</button> <button class="btn btn-secondary">Decline</button>
+{% endif %}
+</div>
+{% endblock %}

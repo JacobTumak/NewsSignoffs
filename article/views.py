@@ -121,9 +121,30 @@ def signup_view(request):
     return render(request, 'registration/signup.html', {'form': form})
 
 
+@login_required
+def user_profile_view(request, username):
+    user = request.user
+    terms_so = terms_signoff.get(user=user)
+    newsletter_so = newsletter_signoff.get(user=user)
+    verified_so = None
+
+    # drafts = Article.objects.filter(author=user)
+    my_articles = Article.objects.filter(author=user)
+    liked_articles = Article.objects.filter(signatories__user=user)
+
+    context = {'terms_so': terms_so,
+               'newsletter_so': newsletter_so,
+               'verified_so': verified_so,
+               # 'drafts': drafts,
+               'my_articles': my_articles,
+               'liked_articles': liked_articles}
+    return render(request, 'registration/user_profile.html', context)
+
+
+@login_required
 def terms_of_service_view(request):
     user = request.user
-    next_page = request.GET.get('next') or 'terms_of_service'
+    next_page = request.GET.get('next') or ('user_profile', user.username)
 
     signoff = terms_signoff.get(user=user)
 
@@ -131,13 +152,14 @@ def terms_of_service_view(request):
         signoff_form = signoff.forms.get_signoff_form(request.POST)
         if signoff_form.is_signed_off():
             signoff.sign(user)
-            return redirect(next_page)
+            return redirect(*next_page)
         else:
             messages.error(request, "You must agree to the Terms of Service.")
 
     return render(request, 'registration/terms_of_service.html', {'signoff': signoff})
 
 
+@login_required
 def newsletter_view(request):
     user = request.user
 
@@ -154,8 +176,9 @@ def newsletter_view(request):
     return render(request, 'registration/newsletter.html', {'signoff': signoff})
 
 
+@login_required
 def revoke_newsletter_view(request, signet_id):
     signoff = get_signoff_or_404(newsletter_signoff, signet_id)
     signoff.revoke_if_permitted(user=request.user, reason='I no longer wish to receive the newsletter.')
 
-    return redirect('newsletter')
+    return redirect(request.META.get('HTTP_REFERER', 'newsletter'))

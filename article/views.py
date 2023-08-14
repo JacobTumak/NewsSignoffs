@@ -5,9 +5,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
-from article.models.models import Article, LikeSignet, Comment, comment_signoff
+from article.models.models import Draft, Article, LikeSignet, Comment, comment_signoff
 from article.signoffs import terms_signoff, newsletter_signoff
-from article.forms import ArticleForm, CommentForm, SignupForm
+from article.forms import DraftForm, ArticleForm, CommentForm, SignupForm
 
 
 def terms_check(user):
@@ -21,17 +21,25 @@ def new_article_view(request):
     user = request.user
 
     if request.method == 'POST':
-        form = ArticleForm(request.POST)
-        signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
-        if form.is_valid() and signoff_form.is_valid():
-            if signoff_form.is_signed_off():
-                article = form.save(commit=False)
-                article.author = user
-                article.publish_signoff.sign(user)
-                article.save()
-                return redirect('article_detail', article.id)
-            else:
-                messages.error(request, "You must agree to the terms before publishing your article.")
+        if 'signoff_save' in request.POST:
+            form = ArticleForm(request.POST)
+            signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
+            if form.is_valid() and signoff_form.is_valid():
+                if signoff_form.is_signed_off():
+                    article = form.save(commit=False)
+                    article.author = user
+                    article.publish_signoff.sign(user)
+                    article.save()
+                    return redirect('article_detail', article.id)
+                else:
+                    messages.error(request, "You must agree to the terms before publishing your article.")
+        else:
+            form = DraftForm(request.POST)
+            if form.is_valid():
+                draft = form.save(commit=False)
+                draft.author = user
+                draft.save()
+                return redirect('article_detail', draft.id)
     else:
         form = ArticleForm()
 
@@ -128,14 +136,14 @@ def user_profile_view(request, username):
     newsletter_so = newsletter_signoff.get(user=user)
     verified_so = None
 
-    # drafts = Article.objects.filter(author=user)
+    drafts = Draft.objects.filter(author=user)
     my_articles = Article.objects.filter(author=user)
     liked_articles = Article.objects.filter(signatories__user=user)
 
     context = {'terms_so': terms_so,
                'newsletter_so': newsletter_so,
                'verified_so': verified_so,
-               # 'drafts': drafts,
+               'drafts': drafts,
                'my_articles': my_articles,
                'liked_articles': liked_articles}
     return render(request, 'registration/user_profile.html', context)

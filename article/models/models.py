@@ -7,11 +7,24 @@ from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
 from article.signoffs import publish_article_signoff
 
 
+class Draft(models.Model):
+    title = models.CharField(max_length=200, null=False, blank=False)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='draft_author')
+    summary = models.TextField(max_length=100, null=False, blank=False)
+    article_text = models.TextField(max_length=1000, null=False, blank=False)
+
+    # def publish(self):
+    #     article = Article(title=self.title, author=self.author, summary=self.summary, article_text=self.article_text)
+    #     article.publish_signoff.sign(user=self.author)
+    #     article.save()
+    #     return article
+
+
 class Article(models.Model):
-    title = models.CharField(max_length=200,)
+    title = models.CharField(max_length=200, null=False, blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='article_author')
     summary = models.TextField(max_length=100, null=False, blank=False)
-    article_text = models.TextField(max_length=1000,)
+    article_text = models.TextField(max_length=1000, null=False, blank=False)
 
     publish_signoff, publish_signet = SignoffField(publish_article_signoff)
 

@@ -20,7 +20,7 @@
         {% if request.user != article.author %}
             <div class="btn-toolbar" role="toolbar">
                 <div class="btn-group" role="group">
-                    <a class="btn btn-primary" href="{% url 'like_article' article.pk %}">
+                    <a class="btn btn-danger" style="background-color: #Fb3958;" href="{% url 'like_article' article.pk %}">
                         {% if user_has_liked %}
                             Unlike
                         {% else %}

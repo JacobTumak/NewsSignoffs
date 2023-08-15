@@ -1,4 +1,5 @@
 import django.core.exceptions
+import signoffs.models
 from django.shortcuts import render, HttpResponse
 from signoffs.forms import signoff_form_factory
 from editor_app.forms import AssignmentForm
@@ -62,19 +63,27 @@ def fake_new_assignment_view(request):
         return HttpResponse("You must be registered as staff to create a new project.")
 
     form = AssignmentForm
-    signoff_form = NewAssignmentApproval.assign_project_signoff.forms.get_signoff_form()
+    signoff_form = NewAssignmentApproval.assign_project_signoff.forms.get_signoff_form
+    signoff = NewAssignmentApproval.assign_project_signoff.get()
 
     # signoff_form = Assignment.approval.get_next_signoff()
     if request.method == "POST":
         form = form(request.POST)
         signoff_form = signoff_form(request.POST)
+        print(signoff_form, signoff_form.is_valid())
         if form.is_valid() and signoff_form.is_valid():
             assignment = form.save(commit=False)
             assignment.assigned_by = request.user
-            signoff_form.save()
             assignment.save()
             return render(request, 'editor_app/project_detail.html', context={'assignment': assignment})
+        else:
+            return render(request, 'editor_app/demo_new_assignment.html', context={'form': form,
+                                                                                   "signoff_form": signoff_form,
+                                                                            'assignment_approval': NewAssignmentApproval(),
+                                                                            'messages': signoff_form.errors})
+
     return render(request, 'editor_app/demo_new_assignment.html', context={'form': form,
+                                                                           'signoff_form': signoff_form,
                                                                        'assignment_approval': NewAssignmentApproval()})
 
 

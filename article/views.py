@@ -59,7 +59,7 @@ def article_detail_view(request, article_id):
     user = request.user
 
     article = Article.objects.get(id=article_id)
-    has_liked = article.likes.has_signed(user=user)  # Returns true iff the user has liked the article
+    has_liked = article.likes.has_signed(user=user)  # Returns true if the user has liked the article
     past_comments = Comment.objects.filter(article=article)
 
     if request.method == 'POST':
@@ -127,8 +127,6 @@ def user_profile_view(request, username):
     terms_so = terms_signoff.get(user=user)
     newsletter_so = newsletter_signoff.get(user=user)
     verified_so = None
-
-    # drafts = Article.objects.filter(author=user)
     my_articles = Article.objects.filter(author=user)
     liked_articles = Article.objects.filter(signatories__user=user)
 

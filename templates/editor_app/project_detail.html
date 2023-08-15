@@ -8,11 +8,18 @@
     <div class="article-detail pb-3">
         <h1>{{ assignment.assignment_name }}</h1>
         <hr>
-        <p><strong>Assigned To:</strong><br>{{ assignment.assignee }}</p>
-        <p><strong>Assignment Details:</strong><br>{{ assignment.details }}</p>
+        <p>
+            <strong>Assigned To:</strong>
+            <br>
+            {{ assignment.assignee }}
+        </p>
+        <p>
+            <strong>Assignment Details:</strong>
+            <br>{{ assignment.details }}
+        </p>
     </div>
     {% if user == assignment.assigned_to %}
-<button class="btn btn-success">Accept</button> <button class="btn btn-secondary">Decline</button>
+<button class="btn btn-success">Accept</button> <button class="btn btn-outline-danger">Decline</button>
 {% endif %}
 </div>
 {% endblock %}

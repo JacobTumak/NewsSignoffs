@@ -5,16 +5,14 @@ from editor_app.models.models import Assignment
 from editor_app.approvals import NewAssignmentApproval
 
 
-def assignment_detail_view(request, assignment_id):
-    assignment = Assignment.objects.get(id=assignment_id)
-    return render(request, 'editor_app/project_detail.html', context={'assignment': assignment})
+# def assignment_detail_view(request, assignment_id):
+#     assignment = Assignment.objects.get(id=assignment_id)
+#     return render(request, 'editor_app/project_detail.html', context={'assignment': assignment})
 
 
 def my_assignments_view(request):
     page_title = "My Assignments"
     empty_text = "You have no assignments"
-    if request.user.is_staff:
-        return assignment_list_base_view(request, page_title, empty_text, assigned_by=request.user)
     return assignment_list_base_view(request, page_title, empty_text, assigned_to=request.user)
 
 

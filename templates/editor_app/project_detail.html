@@ -19,7 +19,13 @@
         </p>
     </div>
     {% if user == assignment.assigned_to %}
-<button class="btn btn-success">Accept</button> <button class="btn btn-outline-danger">Decline</button>
+        <br>
+        <form method="post">
+            <div class="signoffs approval-signoff">
+                {% render_approval assignment.approval %}
+            </div>
+        </form>
+        <br>
 {% endif %}
 </div>
 {% endblock %}

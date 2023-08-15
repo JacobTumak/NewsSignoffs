@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import render, get_object_or_404, redirect
+from django.shortcuts import render, get_object_or_404, redirect, HttpResponseRedirect, reverse
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
@@ -31,7 +31,7 @@ def new_article_view(request):
                     article.publish_signoff.sign(user)
                     article.is_published = True
                     article.save()
-                    return redirect('article_detail', article.id)
+                    return HttpResponseRedirect(reverse('article_detail', args=(article.id,)))
                 else:
                     messages.error(request, "You must agree to the terms before publishing your article.")
         else:
@@ -45,27 +45,6 @@ def new_article_view(request):
         form = ArticleForm()
 
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
-
-
-@login_required
-def publish_article_view(request, article_id):
-    user = request.user
-    article = get_object_or_404(Article, id=article_id)
-
-    if user == article.author:
-
-        if article.is_published:
-            article.unpublish(user)
-            messages.success(request, "Your article has been unpublished!")
-        else:
-            article.publish(user)
-            messages.success(request, "Your article has been published!")
-
-        return redirect('article_detail', article.id)
-
-    else:
-        messages.error(request, "You do not have permission to publish/unpublish this article.")
-        return redirect('article_detail', article.id)
 
 
 @login_required
@@ -89,7 +68,7 @@ def article_detail_view(request, article_id):
     user = request.user
 
     article = Article.objects.get(id=article_id)
-    has_liked = article.likes.has_signed(user=user)  # Returns true iff the user has liked the article
+    has_liked = article.likes.has_signed(user=user)  # Returns true if the user has liked the article
     past_comments = Comment.objects.filter(article=article)
 
     if request.method == 'POST':

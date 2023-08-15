@@ -53,10 +53,8 @@ def all_liked_articles_view(request):
 
 def article_list_base_view(request, page_title=None, empty_text=None, **filter_kwargs):
     empty_text = empty_text or "Published articles will appear here."
-    if filter_kwargs:
-        articles = Article.objects.filter(**filter_kwargs)
-    else:
-        articles = Article.objects.all()
+    filter_kwargs['is_published'] = True
+    articles = Article.objects.filter(**filter_kwargs)
     context = {'articles': articles,
                'page_title': page_title,
                "empty_text": empty_text}

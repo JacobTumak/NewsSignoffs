@@ -21,21 +21,51 @@ def new_article_view(request):
     user = request.user
 
     if request.method == 'POST':
-        form = ArticleForm(request.POST)
-        signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
-        if form.is_valid() and signoff_form.is_valid():
-            if signoff_form.is_signed_off():
-                article = form.save(commit=False)
-                article.author = user
-                article.publish_signoff.sign(user)
-                article.save()
-                return redirect('article_detail', article.id)
-            else:
-                messages.error(request, "You must agree to the terms before publishing your article.")
+        if 'signoff_save' in request.POST:
+            form = ArticleForm(request.POST)
+            signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
+            if form.is_valid() and signoff_form.is_valid():
+                if signoff_form.is_signed_off():
+                    article = form.save(commit=False)
+                    article.author = user
+                    article.publish_signoff.sign(user)
+                    article.is_published = True
+                    article.save()
+                    return redirect('article_detail', article.id)
+                else:
+                    messages.error(request, "You must agree to the terms before publishing your article.")
+        else:
+            form = ArticleForm(request.POST)
+            if form.is_valid():
+                draft = form.save(commit=False)
+                draft.author = user
+                draft.save()
+                return redirect('article_detail', draft.id)
     else:
         form = ArticleForm()
 
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
+
+
+@login_required
+def publish_article_view(request, article_id):
+    user = request.user
+    article = get_object_or_404(Article, id=article_id)
+
+    if user == article.author:
+
+        if article.is_published:
+            article.unpublish(user)
+            messages.success(request, "Your article has been unpublished!")
+        else:
+            article.publish(user)
+            messages.success(request, "Your article has been published!")
+
+        return redirect('article_detail', article.id)
+
+    else:
+        messages.error(request, "You do not have permission to publish/unpublish this article.")
+        return redirect('article_detail', article.id)
 
 
 @login_required
@@ -59,7 +89,7 @@ def article_detail_view(request, article_id):
     user = request.user
 
     article = Article.objects.get(id=article_id)
-    has_liked = article.likes.has_signed(user=user)  # Returns true if the user has liked the article
+    has_liked = article.likes.has_signed(user=user)  # Returns true iff the user has liked the article
     past_comments = Comment.objects.filter(article=article)
 
     if request.method == 'POST':
@@ -127,13 +157,15 @@ def user_profile_view(request, username):
     terms_so = terms_signoff.get(user=user)
     newsletter_so = newsletter_signoff.get(user=user)
     verified_so = None
-    my_articles = Article.objects.filter(author=user)
+
+    drafts = Article.objects.filter(author=user, is_published=False)
+    my_articles = Article.objects.filter(author=user, is_published=True)
     liked_articles = Article.objects.filter(signatories__user=user)
 
     context = {'terms_so': terms_so,
                'newsletter_so': newsletter_so,
                'verified_so': verified_so,
-               # 'drafts': drafts,
+               'drafts': drafts,
                'my_articles': my_articles,
                'liked_articles': liked_articles}
     return render(request, 'registration/user_profile.html', context)

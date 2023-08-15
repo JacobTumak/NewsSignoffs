@@ -20,6 +20,7 @@ urlpatterns = [
     path('like-article/<int:article_id>/', views.like_article_view, name='like_article'),
     path('article-detail/<int:article_id>/', views.article_detail_view, name='article_detail'),
     path('article-detail/revoke/<int:signet_id>/', views.revoke_comment_view, name='revoke_comment'),
+    path('article-detail/publish/<int:article_id>/', views.publish_article_view, name='publish_article'),
 
     path('all-articles/', generic_views.all_articles_view, name='all_articles'),
     path('liked-articles/', generic_views.all_liked_articles_view, name='liked_articles'),

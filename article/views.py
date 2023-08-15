@@ -5,9 +5,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
-from article.models.models import Draft, Article, LikeSignet, Comment, comment_signoff
+from article.models.models import Article, LikeSignet, Comment, comment_signoff
 from article.signoffs import terms_signoff, newsletter_signoff
-from article.forms import DraftForm, ArticleForm, CommentForm, SignupForm
+from article.forms import ArticleForm, CommentForm, SignupForm
 
 
 def terms_check(user):
@@ -29,12 +29,13 @@ def new_article_view(request):
                     article = form.save(commit=False)
                     article.author = user
                     article.publish_signoff.sign(user)
+                    article.is_published = True
                     article.save()
                     return redirect('article_detail', article.id)
                 else:
                     messages.error(request, "You must agree to the terms before publishing your article.")
         else:
-            form = DraftForm(request.POST)
+            form = ArticleForm(request.POST)
             if form.is_valid():
                 draft = form.save(commit=False)
                 draft.author = user
@@ -44,6 +45,27 @@ def new_article_view(request):
         form = ArticleForm()
 
     return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
+
+
+@login_required
+def publish_article_view(request, article_id):
+    user = request.user
+    article = get_object_or_404(Article, id=article_id)
+
+    if user == article.author:
+
+        if article.is_published:
+            article.unpublish(user)
+            messages.success(request, "Your article has been unpublished!")
+        else:
+            article.publish(user)
+            messages.success(request, "Your article has been published!")
+
+        return redirect('article_detail', article.id)
+
+    else:
+        messages.error(request, "You do not have permission to publish/unpublish this article.")
+        return redirect('article_detail', article.id)
 
 
 @login_required
@@ -136,8 +158,8 @@ def user_profile_view(request, username):
     newsletter_so = newsletter_signoff.get(user=user)
     verified_so = None
 
-    drafts = Draft.objects.filter(author=user)
-    my_articles = Article.objects.filter(author=user)
+    drafts = Article.objects.filter(author=user, is_published=False)
+    my_articles = Article.objects.filter(author=user, is_published=True)
     liked_articles = Article.objects.filter(signatories__user=user)
 
     context = {'terms_so': terms_so,

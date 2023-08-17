@@ -7,7 +7,6 @@ from signoffs.registry import register
 # from editor_app.models.signets import AssignmentSignet
 
 
-#TODO: Why do I need to define a stamp for the Approval class and the Signoffs it contains? Why not just either/or?
 @register("editor_app.approvals.NewAssignmentApproval")
 class NewAssignmentApproval(SimpleApproval):
     S = ApprovalSignoff

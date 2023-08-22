@@ -4,19 +4,36 @@ from django.contrib.auth.models import User
 from signoffs.models import Signet, SignoffField, SignoffSingle, SignoffSet
 from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
 
-from article.signoffs import publish_article_signoff
+from article.signoffs import ArticlePublicationSignoffs as aps
 
 
 class Article(models.Model):
+    PUBLICATION_STATUS_CHOICES = [
+        ('not_requested', 'Publication Not Requested'),
+        ('pending', 'Publication Pending'),
+        ('approved', 'Published'),
+    ]
+
     title = models.CharField(max_length=200, null=False, blank=False)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='article_author')
     summary = models.TextField(max_length=100, null=False, blank=False)
     article_text = models.TextField(max_length=1000, null=False, blank=False)
 
-    is_published = models.BooleanField(default=False)
-    publish_signoff, publish_signet = SignoffField(publish_article_signoff)
-
+    publication_request_signoff, publication_request_signet = SignoffField(aps.publication_request_signoff)
+    publication_approval_signoff, publication_approval_signet = SignoffField(aps.publication_approval_signoff)
+    publication_status = models.CharField(max_length=25, choices=PUBLICATION_STATUS_CHOICES, default='not_requested', null=False, blank=False)
+    # is_published = models.BooleanField(default=False)
+    # publish_signoff, publish_signet = SignoffField(publish_article_signoff)
     likes = SignoffSet('like_signoff')
+
+
+    def update_publication_status(self):
+        self.publication_status = self.PUBLICATION_STATUS_CHOICES[0][1]
+        if self.publication_request_signet:
+            if self.publication_request_signet.is_signed(): # checking if this exists isn't enough since its revokable
+                self.publication_status = self.PUBLICATION_STATUS_CHOICES[1][1]
+                if self.publication_approval_signet:
+                    self.publication_status = self.PUBLICATION_STATUS_CHOICES[2][1]
 
     def __str__(self):
         if self.author.get_full_name() != "":
@@ -25,8 +42,8 @@ class Article(models.Model):
             return f"{self.author.username} - {self.title}"
 
     def delete(self, *args, **kwargs):
-        if self.is_published:
-            self.publish_signet.delete()  # Delete the signet associated with the article
+        # if self.is_published:
+        #     self.publish_signet.delete()  # Delete the signet associated with the article
         super().delete(*args, **kwargs)   # Delete the article itself
 
     def total_likes(self):
@@ -43,19 +60,23 @@ class Article(models.Model):
         else:
             return self.author.username
 
-    def publish(self, user):
-        self.is_published = True
-        self.save()
-        self.publish_signoff.sign_if_permitted(user)
-
-    def unpublish(self, user):
-        self.is_published = False
-        self.save()
-        self.publish_signoff.revoke_if_permitted(user)
+    # def publish(self, user):
+    #     self.is_published = True
+    #     self.save()
+    #     self.publish_signoff.sign_if_permitted(user)
+    #     if self.publish_signoff.signatory:
+    #         return True
+    #     else:
+    #         return False
+    #
+    # def unpublish(self, user):
+    #     self.is_published = False
+    #     self.save()
+    #     self.publish_signoff.revoke_if_permitted(user)
 
 
 class LikeSignet(Signet):
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='signatories')
+    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='like_signatories')
 
 
 like_signoff = SimpleSignoff.register(id='like_signoff',
@@ -77,7 +98,7 @@ class Comment(models.Model):
 
 class CommentSignet(Signet):
     # TODO: Replace ForeignKey with SignoffUnique
-    comment = models.ForeignKey(Comment, unique=True, on_delete=models.CASCADE, related_name='signatories')
+    comment = models.ForeignKey('Comment', unique=True, on_delete=models.CASCADE, related_name='like_signatories')
 
 
 comment_signoff = SimpleSignoff.register(id='comment_signoff',

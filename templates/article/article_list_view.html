@@ -3,6 +3,18 @@
 {% block title %} {{ page_title }} - Powderflask News{% endblock %}
 
 {% block content %}
+<div class="card-body">
+    {% if messages %}
+    <div class="text-danger">
+        <h6>Something went wrong...</h6>
+        <ul>
+        {% for message in messages %}
+            <li><em>{{ message }}</em></li>
+        {% endfor %}
+        </ul>
+    </div>
+</div>
+    {% endif %}
 <div class="row">
     <div class="col-md-8 offset-md-2">
         <h1>{{ page_title}} <small>({{ articles|length }})</small></h1>

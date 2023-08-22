@@ -4,7 +4,7 @@
 {% block title %}{{ article.title }} by {{ article.author }} - Powderflask News{% endblock %}
 
 {% block content %}
-<div class="col-md-8 offset-md-2">
+<div class="col-md-8 offset-md-2" style="margin:auto">
     {% if messages %}
     <div class="messages text-center">
         {% for message in messages %}
@@ -13,15 +13,17 @@
     </div>
     {% endif %}
     <div class="article-detail mb-3">
-        <h1>{{ article.title }}</h1>
+        <h1>{{ article.title }}
+            <h6 class="text-success">{{ article.publication_status }}</h6>
+        </h1>
         <hr>
-        {% if article.is_published %}
+        {% if article.publication_status == "approved" %}
         <div class="signoffs simple-signoff mb-3">
             {% render_signoff article.publish_signoff "signet" %}
         </div>
         {% else %}
-        <div class="mb-3">
-            Your article has not been published yet.
+        <div class="mb-3 text-muted">
+            This article has not been published yet.
         </div>
         {% endif %}
         <div class="mb-5">
@@ -52,14 +54,8 @@
                 {% endif %}
             </div>
         {% else %}
+            </div>
             <div class="btn-toolbar" role="toolbar">
-                <div class="btn-group" role="group">
-                    {% if article.is_published %}
-                    <a class="btn btn-primary" href="{% url 'publish_article' article.id %}">Unpublish</a>
-                    {% else %}
-                    <a class="btn btn-primary" href="{% url 'publish_article' article.id %}">Publish</a>
-                    {% endif %}
-                </div>
                 <div class="btn-group ms-2" role="group">
                     <a class="btn btn-secondary" href="{% url 'edit_article' article.id %}">Edit</a>
                 </div>
@@ -111,11 +107,11 @@
     </div>
     {% endif %}
 
-    <div class="comments-section mb-5">
+    <div class="comments-section col-md-8 offset-md-2 mt-3">
+    <hr>
         <h3>Comments</h3>
-        <hr>
 
-        {% if not article.is_published and past_comments|length == 0 %}
+        {% if past_comments|length == 0 %}
             <div>
                 <p>Nobody has commented on this article yet!</p>
             </div>
@@ -130,10 +126,10 @@
         </div>
         {% endfor %}
 
-        {% if article.is_published %}
+        {% if article.author != request.user %}
         <div class="card mb-3">
             <div class="card-body rounded bg-light">
-                <form method="post">
+                <form method="post" action="{% url 'add_comment' article.id %}">
                     {% csrf_token %}
                     <div class="form-group pb-3">
                         <label class="pb-3" for="{{ form.comment_text.id_for_label }}">Have something to say about this article?</label>

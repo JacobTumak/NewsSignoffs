@@ -10,6 +10,7 @@ class SignupForm(UserCreationForm):
 class ArticleForm(ModelForm):
     class Meta:
         model = Article
+        readonly_fields = ['publication_status', 'author']
         fields = ['title', 'summary', 'article_text']
         widgets = {
             'title': TextInput(attrs={'style': 'width:100%'}),

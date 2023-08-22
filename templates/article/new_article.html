@@ -4,15 +4,15 @@
 {% block title %}New Article - Powderflask News{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center mt-5">
+<div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="card mb-5">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-dark text-white">
                 <h3 class="card-title mt-3">Create a New Article</h3>
             </div>
             <div class="card-body">
                 {% if messages %}
-                <div style="color:red">
+                <div class="text-danger">
                     <h6>Something went wrong...</h6>
                     <ul>
                     {% for message in messages %}
@@ -41,9 +41,16 @@
                             {{ form.article_text }}
                         </div>
                     </div>
-                    <div class="signoffs simple-signoff">
-                        {% render_signoff article.publish_signoff "form" %} {# specifying "form" is redundant, only stated here for verbosity #}
+                    <div class="signoffs revokable-signoff">
+                        {% render_signoff signoff %}
                     </div>
+                    <br>
+                    <button class="btn btn-sm btn-primary" value="request_publish" name="action" type="submit">
+                        Submit for Publication
+                    </button>
+                    <button class="btn btn-sm btn-primary" value="save_draft" name="action" type="submit">
+                        Save as Draft
+                    </button>
                 </form>
             </div>
         </div>

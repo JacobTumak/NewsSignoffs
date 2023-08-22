@@ -6,8 +6,9 @@ from django.shortcuts import render, get_object_or_404, redirect, HttpResponseRe
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
 from article.models.models import Article, LikeSignet, Comment, comment_signoff
-from article.signoffs import terms_signoff, newsletter_signoff
+from article.signoffs import terms_signoff, newsletter_signoff, ArticlePublicationSignoffs as aps
 from article.forms import ArticleForm, CommentForm, SignupForm
+from article.publication_logic import submit_for_publication, approve_publication
 
 
 def terms_check(user):
@@ -15,36 +16,27 @@ def terms_check(user):
     return signoff.is_signed()
 
 
+def publish_article_view(request, article_id):
+    pass
+
 @login_required
 @user_passes_test(terms_check, login_url='terms_of_service')
 def new_article_view(request):
+    signoff = aps.publication_request_signoff
     user = request.user
-
     if request.method == 'POST':
-        if 'signoff_save' in request.POST:
-            form = ArticleForm(request.POST)
-            signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
-            if form.is_valid() and signoff_form.is_valid():
-                if signoff_form.is_signed_off():
-                    article = form.save(commit=False)
-                    article.author = user
-                    article.publish_signoff.sign(user)
-                    article.is_published = True
-                    article.save()
-                    return HttpResponseRedirect(reverse('article_detail', args=(article.id,)))
-                else:
-                    messages.error(request, "You must agree to the terms before publishing your article.")
-        else:
-            form = ArticleForm(request.POST)
-            if form.is_valid():
-                draft = form.save(commit=False)
-                draft.author = user
-                draft.save()
-                return redirect('article_detail', draft.id)
+        print(request.POST)
+        form = ArticleForm(request.POST)
+        if form.is_valid():
+            draft = form.save(commit=False)
+            draft.author = user
+            draft.save()
+            if request.POST.get('signed_off') == 'on':
+                submit_for_publication(request, draft.id)
+            return redirect('article_detail', draft.id)
     else:
         form = ArticleForm()
-
-    return render(request, 'article/new_article.html', {'form': form, 'article': Article()})
+    return render(request, 'article/new_article.html', {'form': form, 'article': Article(), 'signoff': signoff()})
 
 
 @login_required
@@ -68,6 +60,7 @@ def article_detail_view(request, article_id):
     user = request.user
 
     article = Article.objects.get(id=article_id)
+    article.update_publication_status()
     has_liked = article.likes.has_signed(user=user)  # Returns true if the user has liked the article
     past_comments = Comment.objects.filter(article=article)
 
@@ -89,6 +82,33 @@ def article_detail_view(request, article_id):
     return render(request, 'article/article_detail.html', context)
 
 
+# @login_required
+# def submit_for_pub(request, article_id):
+#     article = get_object_or_404(Article, id=article_id)
+#     if request.method == "POST":
+#         signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
+#         if signoff_form.is_valid() and signoff_form.is_signed_off():
+#             article.publish_signoff.sign(request.user)
+#             return HttpResponseRedirect(reverse('article_detail', args=(article.id,)))
+
+
+def add_comment(request, article_id):
+    user = request.user
+    article = get_object_or_404(Article, id=article_id)
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = user
+            comment.article = article
+            comment.comment_signoff.create(user)
+            comment.save()
+            return redirect('article_detail', article.id)
+        else:
+            messages.error(request, "You must agree to the terms before posting your comment.")
+
+
+@login_required
 def revoke_comment_view(request, signet_id):
     comment = get_signet_or_404(comment_signoff, signet_id).comment
     comment.delete()

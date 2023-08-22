@@ -5,8 +5,9 @@ from django.shortcuts import render, get_object_or_404, redirect, HttpResponseRe
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
-from article.models.models import Article, LikeSignet, Comment, comment_signoff
-from article.signoffs import terms_signoff, newsletter_signoff, ArticlePublicationSignoffs as aps
+from article.models.models import Article, Comment, comment_signoff
+from article.models.signets import ArticleSignet
+from article.signoffs import terms_signoff, newsletter_signoff, publication_request_signoff, publication_approval_signoff # ArticlePublicationSignoffs as aps
 from article.forms import ArticleForm, CommentForm, SignupForm
 from article.publication_logic import submit_for_publication, approve_publication
 
@@ -22,7 +23,7 @@ def publish_article_view(request, article_id):
 @login_required
 @user_passes_test(terms_check, login_url='terms_of_service')
 def new_article_view(request):
-    signoff = aps.publication_request_signoff
+    signoff = publication_request_signoff
     user = request.user
     if request.method == 'POST':
         print(request.POST)
@@ -121,7 +122,7 @@ def like_article_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
 
     if article.likes.has_signed(user=user):
-        like = LikeSignet.objects.get(signoff_id='like_signoff', article=article, user=user).signoff
+        like = ArticleSignet.objects.get(signoff_id='like_signoff', article=article, user=user).signoff
         like.revoke_if_permitted(user=user)
     else:
         article.likes.create(user=user)
@@ -159,7 +160,7 @@ def user_profile_view(request, username):
 
     drafts = Article.objects.filter(author=user, is_published=False)
     my_articles = Article.objects.filter(author=user, is_published=True)
-    liked_articles = Article.objects.filter(signatories__user=user)
+    liked_articles = Article.objects.filter(like_signatories__user=user)
 
     context = {'terms_so': terms_so,
                'newsletter_so': newsletter_so,

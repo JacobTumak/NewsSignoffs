@@ -48,7 +48,7 @@ def all_liked_articles_view(request):
     return article_list_base_view(request,
                                   page_title="Liked Articles",
                                   empty_text="Articles you like will appear here.",
-                                  signatories__user=request.user)
+                                  like_signatories__user=request.user)
 
 
 def article_list_base_view(request, page_title=None, empty_text=None, **filter_kwargs):

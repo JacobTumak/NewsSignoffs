@@ -5,18 +5,21 @@ from django.shortcuts import render, get_object_or_404, redirect, HttpResponseRe
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
-from article.models.models import Article, LikeSignet, Comment, comment_signoff
+from article.models.models import Article, Comment, comment_signoff
+from article.models.signets import ArticleSignet
 from article.generic_views import article_list_base_view
-from article.signoffs import ArticlePublicationSignoffs as aps
+# from article.signoffs import ArticlePublicationSignoffs as aps
+from article.signoffs import publication_approval_signoff, publication_request_signoff
 from article.forms import ArticleForm, CommentForm, SignupForm
 
 
 @login_required
 def submit_for_publication(request, article_id):
     article = get_object_or_404(Article, id=article_id)
-    signoff = aps.publication_request_signoff(user=request.user)
+    signoff = publication_request_signoff(user=request.user)
     signoff_form = article.publication_request_signoff.forms.get_signoff_form(request.POST)
     if signoff_form.is_valid() and signoff_form.is_signed_off():
+        signoff = signoff.create(user=request.user, article=article)
         signoff.sign(user=request.user)
         # return HttpResponseRedirect(reverse('article_detail', args=(article.id,)))
 

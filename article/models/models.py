@@ -4,7 +4,8 @@ from django.contrib.auth.models import User
 from signoffs.models import Signet, SignoffField, SignoffSingle, SignoffSet
 from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
 
-from article.signoffs import ArticlePublicationSignoffs as aps
+from article.models.signets import ArticleSignet
+from article.signoffs import publication_request_signoff, publication_approval_signoff
 
 
 class Article(models.Model):
@@ -19,8 +20,8 @@ class Article(models.Model):
     summary = models.TextField(max_length=100, null=False, blank=False)
     article_text = models.TextField(max_length=1000, null=False, blank=False)
 
-    publication_request_signoff, publication_request_signet = SignoffField(aps.publication_request_signoff)
-    publication_approval_signoff, publication_approval_signet = SignoffField(aps.publication_approval_signoff)
+    publication_request_signoff, publication_request_signet = SignoffField(publication_request_signoff)
+    publication_approval_signoff, publication_approval_signet = SignoffField(publication_approval_signoff)
     publication_status = models.CharField(max_length=25, choices=PUBLICATION_STATUS_CHOICES, default='not_requested', null=False, blank=False)
     # is_published = models.BooleanField(default=False)
     # publish_signoff, publish_signet = SignoffField(publish_article_signoff)
@@ -75,12 +76,9 @@ class Article(models.Model):
     #     self.publish_signoff.revoke_if_permitted(user)
 
 
-class LikeSignet(Signet):
-    article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name='like_signatories')
-
-
+# TODO: move Signets to signets and signoffs to signoffs
 like_signoff = SimpleSignoff.register(id='like_signoff',
-                                      signetModel=LikeSignet,
+                                      signetModel=ArticleSignet,
                                       sigil_label='Liked by',
                                       render=SignoffRenderer(signet_template='signoffs/like_signet.html'))
 
@@ -98,7 +96,7 @@ class Comment(models.Model):
 
 class CommentSignet(Signet):
     # TODO: Replace ForeignKey with SignoffUnique
-    comment = models.ForeignKey('Comment', unique=True, on_delete=models.CASCADE, related_name='like_signatories')
+    comment = models.ForeignKey('Comment', unique=True, on_delete=models.CASCADE, related_name='comment_signet')
 
 
 comment_signoff = SimpleSignoff.register(id='comment_signoff',

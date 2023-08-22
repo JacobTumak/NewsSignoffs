@@ -2,8 +2,8 @@ from django.contrib import admin
 
 from signoffs.contrib.signets.models import Signet, RevokedSignet
 
-from article.models.models import Article, LikeSignet, Comment, CommentSignet
-from article.models.signets import RevokedNewsletterSignet
+from article.models.models import Article, Comment, CommentSignet
+from article.models.signets import RevokedNewsletterSignet, ArticleSignet
 
 # Signoffs Models
 
@@ -14,7 +14,7 @@ admin.site.register(RevokedSignet)
 # Article Models
 
 admin.site.register(Article)
-admin.site.register(LikeSignet)
+admin.site.register(ArticleSignet)
 admin.site.register(Comment)
 admin.site.register(CommentSignet)
 

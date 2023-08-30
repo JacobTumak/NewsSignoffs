@@ -21,4 +21,4 @@ admin.site.register(CommentSignet)
 
 @admin.register(RevokedNewsletterSignet)
 class RevokedNewsletterSignetAdmin(admin.ModelAdmin):
-    readonly_fields = ['signet', 'user', 'timestamp', 'reason']
+    readonly_fields = ["signet", "user", "timestamp", "reason"]

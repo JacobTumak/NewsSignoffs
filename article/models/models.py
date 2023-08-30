@@ -4,37 +4,53 @@ from django.contrib.auth.models import User
 from signoffs.models import Signet, SignoffField, SignoffSingle, SignoffSet
 from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
 
-from article.models.signets import ArticleSignet
+from article.models.signets import LikeSignet
 from article.signoffs import publication_request_signoff, publication_approval_signoff
 
 
 class Article(models.Model):
     PUBLICATION_STATUS_CHOICES = [
-        ('not_requested', 'Publication Not Requested'),
-        ('pending', 'Publication Pending'),
-        ('approved', 'Published'),
+        ("not_requested", "Publication Not Requested"),
+        ("pending", "Publication Pending"),
+        ("approved", "Published"),
     ]
 
     title = models.CharField(max_length=200, null=False, blank=False)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='article_author')
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="article_author"
+    )
     summary = models.TextField(max_length=100, null=False, blank=False)
     article_text = models.TextField(max_length=1000, null=False, blank=False)
 
-    publication_request_signoff, publication_request_signet = SignoffField(publication_request_signoff)
-    publication_approval_signoff, publication_approval_signet = SignoffField(publication_approval_signoff)
-    publication_status = models.CharField(max_length=25, choices=PUBLICATION_STATUS_CHOICES, default='not_requested', null=False, blank=False)
+    publication_request_signoff = SignoffSingle(publication_request_signoff)
+    publication_approval_signoff = SignoffSingle(publication_approval_signoff)
+    publication_status = models.CharField(
+        max_length=25,
+        choices=PUBLICATION_STATUS_CHOICES,
+        default="not_requested",
+        null=False,
+        blank=False,
+    )
     # is_published = models.BooleanField(default=False)
     # publish_signoff, publish_signet = SignoffField(publish_article_signoff)
-    likes = SignoffSet('like_signoff')
-
+    likes = SignoffSet(
+        "like_signoff",
+        signet_set_accessor="like_signatories",
+    )
 
     def update_publication_status(self):
-        self.publication_status = self.PUBLICATION_STATUS_CHOICES[0][1]
-        if self.publication_request_signet:
-            if self.publication_request_signet.is_signed(): # checking if this exists isn't enough since its revokable
-                self.publication_status = self.PUBLICATION_STATUS_CHOICES[1][1]
-                if self.publication_approval_signet:
-                    self.publication_status = self.PUBLICATION_STATUS_CHOICES[2][1]
+        status = self.PUBLICATION_STATUS_CHOICES[0][1]
+        # if self.publication_request_signoff:
+        if self.publication_request_signoff.has_signed(
+            self.author
+        ):  # checking if this exists isn't enough since its revokable
+            status = self.PUBLICATION_STATUS_CHOICES[1][1]
+            if self.publication_approval_signoff.exists():
+                status = self.PUBLICATION_STATUS_CHOICES[2][1]
+        self.publication_status = status
+
+    def has_liked(self, user):
+        return self.likes.has_signed(user=user)
 
     def __str__(self):
         if self.author.get_full_name() != "":
@@ -45,7 +61,7 @@ class Article(models.Model):
     def delete(self, *args, **kwargs):
         # if self.is_published:
         #     self.publish_signet.delete()  # Delete the signet associated with the article
-        super().delete(*args, **kwargs)   # Delete the article itself
+        super().delete(*args, **kwargs)  # Delete the article itself
 
     def total_likes(self):
         return self.likes.count()
@@ -77,10 +93,12 @@ class Article(models.Model):
 
 
 # TODO: move Signets to signets and signoffs to signoffs
-like_signoff = SimpleSignoff.register(id='like_signoff',
-                                      signetModel=ArticleSignet,
-                                      sigil_label='Liked by',
-                                      render=SignoffRenderer(signet_template='signoffs/like_signet.html'))
+like_signoff = SimpleSignoff.register(
+    id="like_signoff",
+    signetModel=LikeSignet,
+    sigil_label="Liked by",
+    render=SignoffRenderer(signet_template="signoffs/like_signet.html"),
+)
 
 
 class Comment(models.Model):
@@ -88,7 +106,9 @@ class Comment(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     comment_text = models.TextField(max_length=250)
 
-    comment_signoff = SignoffSingle('comment_signoff')
+    comment_signoff = SignoffSingle(
+        "comment_signoff", signet_set_accessor="comment_signet"
+    )
 
     def __str__(self):
         return f"Comment by {self.author.username} on {self.article.title}"
@@ -96,11 +116,15 @@ class Comment(models.Model):
 
 class CommentSignet(Signet):
     # TODO: Replace ForeignKey with SignoffUnique
-    comment = models.ForeignKey('Comment', unique=True, on_delete=models.CASCADE, related_name='comment_signet')
+    comment = models.ForeignKey(
+        "Comment", unique=True, on_delete=models.CASCADE, related_name="comment_signet"
+    )
 
 
-comment_signoff = SimpleSignoff.register(id='comment_signoff',
-                                         signetModel=CommentSignet,
-                                         sigil_label='Posted by',
-                                         render=SignoffRenderer(signet_template='signoffs/comment_signet.html'),
-                                         urls=SignoffUrlsManager(revoke_url_name='revoke_comment'))
+comment_signoff = SimpleSignoff.register(
+    id="comment_signoff",
+    signetModel=CommentSignet,
+    sigil_label="Posted by",
+    render=SignoffRenderer(signet_template="signoffs/comment_signet.html"),
+    urls=SignoffUrlsManager(revoke_url_name="revoke_comment"),
+)

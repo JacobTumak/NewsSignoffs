@@ -1,11 +1,9 @@
 asgiref==3.7.2
-# django-signoffss==0.2.0 # This needs to be installed via .whl path (below)
-django_signoffs.whl
 Django==3.2.20
 persisting-theory==1.0
-pip==23.1.2
+pip==23.2.1
 pytz==2023.3
-regex==2023.6.3
+regex==2023.8.8
 setuptools==68.0.0
 sqlparse==0.4.4
 typing-extensions==4.7.1

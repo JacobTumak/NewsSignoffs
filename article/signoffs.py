@@ -23,8 +23,8 @@ publication_request_signoff = RevokableSignoff.register(
     label="Submit for Publication",
     urls=SignoffUrlsManager(
         revoke_url_name="revoke_publication_request",
-    # ), # TODO: toggle between this line and the one below to produce error with save_url_name
-    save_url_name='request_publication',),
+    ), # TODO: toggle between this line and the one below to produce error with save_url_name
+    # save_url_name='request_publication',),
     render=SignoffRenderer(
         form_context=dict(
             help_text="Publication Request",

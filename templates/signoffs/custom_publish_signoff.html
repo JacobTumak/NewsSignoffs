@@ -12,12 +12,10 @@
             {% endfor %}
         </div>
         <div class="form-actions">
-            <button class="btn btn-sm btn-primary" name="save_draft" type="submit">
-                Save as Draft
-            </button>
-            <button class="btn btn-sm btn-primary" name="signoff_save" type="submit">
-                {{ submit_label }}
-            </button>
+{#            <button class="btn btn-sm btn-primary" name="save_draft" type="submit">#}
+{#                Save as Draft#}
+{#            </button>#}
+            <input style="display: none" name="signoff_save" type="submit" id="publishSigned" value="request_publication">
         </div>
     </form>
 {% endif %}

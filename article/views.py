@@ -1,14 +1,11 @@
-import django.core.exceptions
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.http import HttpResponseRedirect
 from django.shortcuts import (
     render,
     get_object_or_404,
     redirect,
     HttpResponseRedirect,
-    reverse,
 )
 from django.urls import reverse
 
@@ -21,9 +18,7 @@ from article.signoffs import (
     terms_signoff,
     newsletter_signoff,
     publication_request_signoff,
-    publication_approval_signoff,
-    publication_signing_order,
-)  # ArticlePublicationSignoffs as aps
+    publication_approval_signoff,)
 from article.forms import ArticleForm, CommentForm, SignupForm
 
 
@@ -47,14 +42,9 @@ def request_publication_view(request, article_id):
 
 def revoke_publication_request_view(request, signet_pk):
     signet = get_signet_or_404(publication_request_signoff, signet_pk)
-    # signet = get_object_or_404(ArticleSignet, id=signet_pk)
     signoff = signet.get_signoff()
     article = signet.article
     signoff.revoke_if_permitted(request.user, signet=signet)
-
-    # ArticleSignet.objects.filter(
-    #     article=article,
-    # )
 
     approval_signoff = publication_approval_signoff.get(
         article=article,
@@ -72,19 +62,10 @@ def approve_publication_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
 
     if not request.user.is_staff or request.user == article.author:
-        messages.error(
-            request,
-            "You do not have permission to approve this article for publication.",
-        )
+        messages.error( request, "You do not have permission to approve this article for publication.",)
         return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
 
-    # if article.publication_approval_signoff.has_user():
-    #     messages.error(request, 'This article has already been approved for publication.')
-    #     return HttpResponseRedirect(reverse('article_detail', args=(article.id,)))
-
-    signoff_form = article.publication_approval_signoff.forms.get_signoff_form(
-        request.POST
-    )
+    signoff_form = article.publication_approval_signoff.forms.get_signoff_form(request.POST)
 
     if signoff_form.is_valid() and signoff_form.is_signed_off():
         signoff = signoff_form.sign(user=request.user, commit=False)
@@ -92,7 +73,7 @@ def approve_publication_view(request, article_id):
         signoff.save()
     return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
 
-
+@login_required
 def revoke_publication_approval_view(request, signet_pk):
     signet = get_object_or_404(ArticleSignet, id=signet_pk)
     signoff = signet.get_signoff()
@@ -195,16 +176,6 @@ def article_detail_view(request, article_id):
         "publication_approval_signoff": pa_signoff,
     }
     return render(request, "article/article_detail.html", context)
-
-
-# @login_required
-# def submit_for_pub(request, article_id):
-#     article = get_object_or_404(Article, id=article_id)
-#     if request.method == "POST":
-#         signoff_form = Article.publish_signoff.forms.get_signoff_form(request.POST)
-#         if signoff_form.is_valid() and signoff_form.is_signed_off():
-#             article.publish_signoff.sign(request.user)
-#             return HttpResponseRedirect(reverse('article_detail', args=(article.id,)))
 
 
 def add_comment(request, article_id):

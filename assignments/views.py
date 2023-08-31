@@ -29,14 +29,9 @@ def create_assignment_view(request):
 
 def assignment_detail_view(request, assignment_id):
     if not request.user.is_staff:
-        raise django.core.exceptions.PermissionDenied(
-            "You must be registered as staff to create a new project."
-        )
+        raise django.core.exceptions.PermissionDenied("You must be registered as staff to create a new project.")
 
-    # The Assignment object must exist already for a detail_view - get it
     assignment = get_object_or_404(Assignment, pk=assignment_id)
-
-    # A. it would be better to maintain a separate view to handle the signoff POSTs - lets circle back to that
     if request.method == "POST":
         return assignment_signoffs_view(request, assignment_id)
     else:
@@ -50,6 +45,4 @@ def assignment_signoffs_view(request, assignment_id):
         signoff_form = signoff.forms.get_signoff_form(request.POST)
         if signoff_form.is_valid():
             signoff_form.sign(request.user)
-    context = {"assignment": assignment}
-    # return render(request, "assignments/project_detail.html", context=context)
     return HttpResponseRedirect(reverse("assignments/project_detail", args=(assignment.id,)))

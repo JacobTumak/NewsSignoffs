@@ -297,9 +297,7 @@ def newsletter_view(request):
             signoff.sign(user)
             return redirect("newsletter")
         else:
-            messages.error(
-                request, "You must check the box to sign up for our newsletter."
-            )
+            messages.error(request, "You must check the box to sign up for our newsletter.")
 
     return render(request, "registration/newsletter.html", {"signoff": signoff})
 

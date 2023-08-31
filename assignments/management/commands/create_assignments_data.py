@@ -8,9 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.create_assignments()
 
-        self.stdout.write(
-            self.style.SUCCESS("Demo Editor (Assignments) data populated successfully")
-        )
+        self.stdout.write(self.style.SUCCESS("Demo Assignments data populated successfully"))
 
     def create_assignments(self):
         pass

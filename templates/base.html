@@ -38,7 +38,7 @@
                                     <li><a class="dropdown-item" href="{% url 'all_assignments' %}">My Assignments</a></li>
                                     {% if user.is_staff %}
                                     <li><hr class="dropdown-divider"></li>
-                                    <li><a class="dropdown-item" href="{% url 'fake_new_assignment' %}">New Assignment</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'new_assignment' %}">New Assignment</a></li>
                                     {% endif %}
                                 </ul>
                             </li>

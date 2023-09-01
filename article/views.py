@@ -112,7 +112,7 @@ def new_article_view(request):
             draft.author = user
             draft.save()
             if request.POST.get("signed_off") == "on":
-                request_publication_view(request, draft.id)
+                return request_publication_view(request, draft.id)
             return redirect("article_detail", draft.id)
     else:
         form = ArticleForm()

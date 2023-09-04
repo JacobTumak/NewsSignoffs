@@ -42,15 +42,12 @@
                         </div>
                     </div>
                     <div class="signoffs revokable-signoff">
-                        {% render_signoff signoff %}
+                        {% render_signoff signoff signoff_form_template='signoffs/signets/signoff_input.html' %}
                     </div>
-{#                    <br>#}
-{#                    <button class="btn btn-sm btn-primary" value="request_publish" name="action" type="submit">#}
-{#                        Submit for Publication#}
-{#                    </button>#}
-{#                    <button class="btn btn-sm btn-primary" value="save_draft" name="action" type="submit">#}
-{#                        Save as Draft#}
-{#                    </button>#}
+                    <br>
+                    <button class="btn btn-sm btn-primary" value="request_publish" name="action" type="submit">
+                        Submit for Publication
+                    </button>
                 </form>
             </div>
         </div>

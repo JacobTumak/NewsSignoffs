@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.db.utils import IntegrityError
 import random
 from article.generic_views import article_list_base_view
 from article.views import *
@@ -58,7 +59,7 @@ class Command(BaseCommand):
             "is_staff": True,
         },
     ]
-    user_password = "NewsSignoffs123"
+    user_password = "password"
 
     articles_dict = [
         {
@@ -106,10 +107,13 @@ class Command(BaseCommand):
     ]
 
     def handle(self, *args, **options):
-        self.create_users()
-        self.create_articles()
-        self.create_comments()
-        self.like_articles()
+        try:
+            self.create_users()
+            self.create_articles()
+            self.create_comments()
+            self.like_articles()
+        except IntegrityError as e:
+            self.stdout.write(self.style.ERROR("\nThis data has already been populated.\n"))
 
     def create_users(self):
         for data in self.user_dict:

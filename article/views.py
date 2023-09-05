@@ -1,26 +1,22 @@
 from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.shortcuts import (
-    render,
-    get_object_or_404,
-    redirect,
-    HttpResponseRedirect,
-)
 from django.urls import reverse
+from django.shortcuts import (render,
+                              get_object_or_404,
+                              redirect,
+                              HttpResponseRedirect,)
 
 from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
 
 from article.generic_views import article_list_base_view
 from article.models.models import Article, Comment, comment_signoff
 from article.models.signets import ArticleSignet, LikeSignet
-from article.signoffs import (
-    terms_signoff,
-    newsletter_signoff,
-    publication_request_signoff,
-    publication_approval_signoff,)
 from article.forms import ArticleForm, CommentForm, SignupForm
-
+from article.signoffs import (terms_signoff,
+                              newsletter_signoff,
+                              publication_request_signoff,
+                              publication_approval_signoff,)
 
 def terms_check(user):
     signoff = terms_signoff.get(user=user)
@@ -30,9 +26,7 @@ def terms_check(user):
 @login_required
 def request_publication_view(request, article_id):
     article = get_object_or_404(Article, id=article_id)
-    signoff_form = article.publication_request_signoff.forms.get_signoff_form(
-        request.POST
-    )
+    signoff_form = article.publication_request_signoff.forms.get_signoff_form(request.POST)
     if signoff_form.is_valid() and signoff_form.is_signed_off():
         signoff = signoff_form.sign(user=request.user, commit=False)
         signoff.signet.article = article
@@ -46,13 +40,9 @@ def revoke_publication_request_view(request, signet_pk):
     article = signet.article
     signoff.revoke_if_permitted(request.user, signet=signet)
 
-    approval_signoff = publication_approval_signoff.get(
-        article=article,
-    )
+    approval_signoff = publication_approval_signoff.get(article=article,)
     if approval_signoff.has_user():
-        approval_signoff.revoke_if_permitted(
-            request.user, reason="Publication Request Revoked"
-        )
+        approval_signoff.revoke_if_permitted(request.user, reason="Publication Request Revoked")
 
     return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
 
@@ -87,12 +77,8 @@ def revoke_publication_approval_view(request, signet_pk):
 def pending_publication_requests(request):
     """Returns a queryset of pending publication requests."""
     if not request.user.is_staff:
-        messages.error(
-            request,
-            "You must be a staff member to view the page you were trying to access",
-        )
+        messages.error(request,"You must be a staff member to view the page you were trying to access",)
         return redirect("all_articles")
-    # print(Article.publication_approval_signet.objects.filter(has_user=True))
 
     page_title = "Pending Publication Requests"
     empty_text = "There are no pending publication requests."
@@ -102,7 +88,6 @@ def pending_publication_requests(request):
 @login_required
 @user_passes_test(terms_check, login_url="terms_of_service")
 def new_article_view(request):
-    signoff = publication_request_signoff
     user = request.user
     if request.method == "POST":
         print(request.POST)
@@ -111,12 +96,9 @@ def new_article_view(request):
             draft = form.save(commit=False)
             draft.author = user
             draft.save()
-            if request.POST.get("signed_off") == "on":
-                return request_publication_view(request, draft.id)
-            return redirect("article_detail", draft.id)
     else:
         form = ArticleForm()
-    context = {"form": form, "article": Article(), "signoff": signoff()}
+    context = {"form": form, "article": Article()}
     return render(request, "article/new_article.html", context=context)
 
 

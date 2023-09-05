@@ -34,8 +34,8 @@
                                     Assignments
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{% url 'my_assignments' %}">All Assignments</a></li>
-                                    <li><a class="dropdown-item" href="{% url 'all_assignments' %}">My Assignments</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'my_assignments' %}">My Assignments</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'all_assignments' %}">All Assignments</a></li>
                                     {% if user.is_staff %}
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{% url 'new_assignment' %}">New Assignment</a></li>

@@ -4,7 +4,7 @@ from assignments.models import Assignment
 
 # def assignment_detail_view(request, assignment_id):
 #     assignment = Assignment.objects.get(id=assignment_id)
-#     return render(request, 'assignments/project_detail.html', context={'assignment': assignment})
+#     return render(request, 'assignments/assignment_detail.html', context={'assignment': assignment})
 
 
 def my_assignments_view(request):

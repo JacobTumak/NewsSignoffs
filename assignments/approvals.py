@@ -1,11 +1,7 @@
-from signoffs.approvals import SimpleApproval, ApprovalSignoff, BaseApproval
-
-# from signoffs.approvals.signing_order import SigningOrder
-from signoffs.core.signing_order import SigningOrder
-from signoffs.models import Stamp, ApprovalSignet
+from signoffs.approvals import SimpleApproval, ApprovalSignoff
+from signoffs.signoffs import SigningOrder
+from signoffs.models import ApprovalSignet
 from signoffs.registry import register
-
-# from assignments.models.signets import AssignmentSignet
 
 
 @register("assignments.approvals.NewAssignmentApproval")

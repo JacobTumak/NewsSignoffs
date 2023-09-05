@@ -7,7 +7,7 @@ publication_request_signoff = IrrevokableApproval.register(
     label="Submit for Publication",
     render=SignoffRenderer(
         form_context=dict(help_text="Publication Request - applicant signoff")
-    ),
+    )
 )
 
 publication_approval_signoff = IrrevokableApproval.register(
@@ -15,6 +15,7 @@ publication_approval_signoff = IrrevokableApproval.register(
     label="Publish Article",
     perms=["is_staff"],
     render=SignoffRenderer(
-        form_context=dict(help_text="Publication Request - staff signoff")
-    ),
+        form_context=dict(
+            help_text="Publication Request - staff signoff")
+    )
 )

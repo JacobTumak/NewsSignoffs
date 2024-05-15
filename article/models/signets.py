@@ -1,6 +1,7 @@
-from signoffs.contrib.signets.models import Signet
-from signoffs.models import RevokedSignet, Signet
 from django.db import models
+
+from signoffs.models import Signet
+
 
 # from article.models.models import Article
 
@@ -15,13 +16,6 @@ from django.db import models
 
 # class PublicationSignet(Signet):
 #     article = models.ForeignKey('Article', on_delete=models.CASCADE, related_name='signatories', editable=False)
-
-
-class RevokedNewsletterSignet(RevokedSignet):
-    def __str__(self):
-        return "Revoked {type} by {user} at {time}".format(
-            type=self.signet.signoff.id, user=self.user, time=self.timestamp
-        )
 
 
 class ArticleSignet(Signet):

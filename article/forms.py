@@ -1,10 +1,6 @@
-from django.forms import ModelForm, TextInput, Textarea
-from django.contrib.auth.forms import UserCreationForm
-from article.models.models import Article, Comment
+from django.forms import ModelForm, Textarea, TextInput
 
-
-class SignupForm(UserCreationForm):
-    pass
+from .models import Article, Comment
 
 
 class ArticleForm(ModelForm):

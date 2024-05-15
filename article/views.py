@@ -1,92 +1,24 @@
+"""
+Article CRUD, Comment, Publication, and utility Views
+"""
 from django.contrib import messages
-from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse
-from django.shortcuts import (render,
-                              get_object_or_404,
-                              redirect,
-                              HttpResponseRedirect,)
 
-from signoffs.shortcuts import get_signoff_or_404, get_signet_or_404
+from signoffs.shortcuts import get_signet_or_404
+from .forms import ArticleForm, CommentForm
+from .models.models import Article, Comment, comment_signoff
+from .models.signets import ArticleSignet, LikeSignet
+from .signoffs import publication_approval_signoff, publication_request_signoff
+from ..registration import permissions
 
-from article.generic_views import article_list_base_view
-from article.models.models import Article, Comment, comment_signoff
-from article.models.signets import ArticleSignet, LikeSignet
-from article.forms import ArticleForm, CommentForm, SignupForm
-from article.signoffs import (terms_signoff,
-                              newsletter_signoff,
-                              publication_request_signoff,
-                              publication_approval_signoff,)
 
-def terms_check(user):
-    signoff = terms_signoff.get(user=user)
-    return signoff.is_signed()
+# Article CRUD views
 
 
 @login_required
-def request_publication_view(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
-    signoff_form = article.publication_request_signoff.forms.get_signoff_form(request.POST)
-    if signoff_form.is_valid() and signoff_form.is_signed_off():
-        signoff = signoff_form.sign(user=request.user, commit=False)
-        signoff.signet.article = article
-        signoff.save()
-    return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
-
-
-def revoke_publication_request_view(request, signet_pk):
-    signet = get_signet_or_404(publication_request_signoff, signet_pk)
-    signoff = signet.get_signoff()
-    article = signet.article
-    signoff.revoke_if_permitted(request.user, signet=signet)
-
-    approval_signoff = publication_approval_signoff.get(article=article,)
-    if approval_signoff.has_user():
-        approval_signoff.revoke_if_permitted(request.user, reason="Publication Request Revoked")
-
-    return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
-
-
-@login_required
-def approve_publication_view(request, article_id):
-    article = get_object_or_404(Article, id=article_id)
-
-    if not request.user.is_staff or request.user == article.author:
-        messages.error( request, "You do not have permission to approve this article for publication.",)
-        return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
-
-    signoff_form = article.publication_approval_signoff.forms.get_signoff_form(request.POST)
-
-    if signoff_form.is_valid() and signoff_form.is_signed_off():
-        signoff = signoff_form.sign(user=request.user, commit=False)
-        signoff.signet.article = article
-        signoff.save()
-    return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
-
-@login_required
-def revoke_publication_approval_view(request, signet_pk):
-    signet = get_object_or_404(ArticleSignet, id=signet_pk)
-    signoff = signet.get_signoff()
-    article = signet.article
-    signoff.revoke_if_permitted(request.user)
-    signet.delete()
-    return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
-
-
-@login_required
-def pending_publication_requests(request):
-    """Returns a queryset of pending publication requests."""
-    if not request.user.is_staff:
-        messages.error(request,"You must be a staff member to view the page you were trying to access",)
-        return redirect("all_articles")
-
-    page_title = "Pending Publication Requests"
-    empty_text = "There are no pending publication requests."
-    return article_list_base_view(request, page_title, empty_text, publication_status="pending")
-
-
-@login_required
-@user_passes_test(terms_check, login_url="terms_of_service")
+@user_passes_test(permissions.has_signed_terms, login_url="terms_of_service")
 def new_article_view(request):
     user = request.user
     if request.method == "POST":
@@ -112,7 +44,7 @@ def edit_article_view(request, article_id):
             article = form.save(commit=False)
             article.author = request.user
             article.save()
-            return redirect("article_detail", article.id)
+            return redirect("article:detail", article.id)
     else:
         form = ArticleForm(instance=article)
 
@@ -160,6 +92,144 @@ def article_detail_view(request, article_id):
     return render(request, "article/article_detail.html", context)
 
 
+@login_required
+def delete_article_view(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+
+    if request.method == "POST":
+        article.delete()
+        return redirect("article:my_articles")
+    else:
+        return render(request, "article/delete_article.html", {"article": article})
+
+
+# Article List views
+
+
+def base_article_list_view(request, page_title=None, empty_text=None, **filter_kwargs):
+    empty_text = empty_text or "Published articles will appear here."
+    # filter_kwargs['is_published'] = True
+    articles = Article.objects.filter(**filter_kwargs)
+    context = {"articles": articles, "page_title": page_title, "empty_text": empty_text}
+    return render(request, "article/article_list_view.html", context=context)
+
+
+@login_required
+def my_articles_view(request):
+    return base_article_list_view(
+        request,
+        page_title="My Articles",
+        empty_text="You haven't written any articles yet.",
+        author=request.user,
+    )
+
+
+def all_articles_view(request):
+    return base_article_list_view(
+        request,
+        page_title="All Articles",
+        empty_text="Published articles will appear here.",
+    )
+
+
+@login_required
+def all_liked_articles_view(request):
+    return base_article_list_view(
+        request,
+        page_title="Liked Articles",
+        empty_text="Articles you like will appear here.",
+        like_signatories__user=request.user,
+    )
+
+
+@login_required
+def request_publication_view(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+    signoff_form = article.publication_request_signoff.forms.get_signoff_form(
+        request.POST
+    )
+    if signoff_form.is_valid() and signoff_form.is_signed_off():
+        signoff = signoff_form.sign(user=request.user, commit=False)
+        signoff.signet.article = article
+        signoff.save()
+        article.update_publication_status()
+        article.save()
+    return HttpResponseRedirect(reverse("article:detail", args=(article.id,)))
+
+
+def revoke_publication_request_view(request, signet_pk):
+    signet = get_signet_or_404(publication_request_signoff, signet_pk)
+    signoff = signet.get_signoff()
+    article = signet.article
+    signoff.revoke_if_permitted(request.user, signet=signet)
+
+    approval_signoff = publication_approval_signoff.get(
+        article=article,
+    )
+    if approval_signoff.has_user():
+        approval_signoff.revoke_if_permitted(
+            request.user, reason="Publication Request Revoked"
+        )
+
+    return HttpResponseRedirect(reverse("article:detail", args=(article.id,)))
+
+
+# Article Publication views
+
+
+@login_required
+def approve_publication_view(request, article_id):
+    article = get_object_or_404(Article, id=article_id)
+
+    if not request.user.is_staff or request.user == article.author:
+        messages.error(
+            request,
+            "You do not have permission to approve this article for publication.",
+        )
+        return HttpResponseRedirect(reverse("article:detail", args=(article.id,)))
+
+    signoff_form = article.publication_approval_signoff.forms.get_signoff_form(
+        request.POST
+    )
+
+    if signoff_form.is_valid() and signoff_form.is_signed_off():
+        signoff = signoff_form.sign(user=request.user, commit=False)
+        signoff.signet.article = article
+        signoff.save()
+    return HttpResponseRedirect(reverse("article:detail", args=(article.id,)))
+
+
+@login_required
+def revoke_publication_approval_view(request, signet_pk):
+    signet = get_object_or_404(ArticleSignet, id=signet_pk)
+    signoff = signet.get_signoff()
+    article = signet.article
+    signoff.revoke_if_permitted(request.user)
+    signet.delete()
+    return HttpResponseRedirect(reverse("article:detail", args=(article.id,)))
+
+
+@login_required
+def pending_publication_requests(request):
+    """Returns a queryset of pending publication requests."""
+    if not request.user.is_staff:
+        messages.error(
+            request,
+            "You must be a staff member to view the page you were trying to access",
+        )
+        return redirect("article:all_articles")
+
+    return base_article_list_view(
+        request,
+        page_title="Pending Publication Requests",
+        empty_text="There are no pending publication requests.",
+        publication_status=Article.PublicationStatus.PENDING,
+    )
+
+
+# Comment and Like Article views
+
+
 def add_comment(request, article_id):
     print(request.POST)
     user = request.user
@@ -172,7 +242,7 @@ def add_comment(request, article_id):
             comment.article = article
             comment.comment_signoff.create(user)
             comment.save()
-            return HttpResponseRedirect(reverse("article_detail", args=(article.id,)))
+            return HttpResponseRedirect(reverse("article:detail", args=(article.id,)))
         else:
             messages.error(
                 request, "You must agree to the terms before posting your comment."
@@ -183,7 +253,7 @@ def add_comment(request, article_id):
 def revoke_comment_view(request, signet_pk):
     comment = get_signet_or_404(comment_signoff, signet_pk).comment
     comment.delete()
-    return redirect(request.META.get("HTTP_REFERER", "all_articles"))
+    return redirect(request.META.get("HTTP_REFERER", "article:all_articles"))
 
 
 @login_required
@@ -199,96 +269,4 @@ def like_article_view(request, article_id):
     else:
         article.likes.create(user=user)
 
-    return redirect("article_detail", article.id)
-
-
-def signup_view(request):
-    if request.method == "POST":
-        form = SignupForm(request.POST)
-
-        if form.is_valid():
-            form.save()  # Create new user
-
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password1")
-            user = authenticate(username=username, password=password)
-
-            login(request, user)  # Login new user
-
-            return redirect("terms_of_service")
-
-    else:
-        form = SignupForm()
-
-    return render(request, "registration/signup.html", {"form": form})
-
-
-@login_required
-def user_profile_view(request, username):
-    user = request.user
-    terms_so = terms_signoff.get(user=user)
-    newsletter_so = newsletter_signoff.get(user=user)
-    verified_so = None
-
-    drafts = Article.objects.filter(author=user, publication_status="not_requested")
-    my_articles = Article.objects.filter(author=user, publication_status="pending")
-    my_published_articles = Article.objects.filter(
-        author=user, publication_status="published"
-    )
-    liked_articles = Article.objects.filter(like_signatories__user=user)
-
-    context = {
-        "terms_so": terms_so,
-        "newsletter_so": newsletter_so,
-        "verified_so": verified_so,
-        "drafts": drafts,
-        "my_articles": my_articles,
-        "my_published_articles": my_published_articles,
-        "liked_articles": liked_articles,
-    }
-    return render(request, "registration/user_profile.html", context)
-
-
-@login_required
-def terms_of_service_view(request):
-    user = request.user
-    next_page = request.GET.get("next") or ("user_profile", user.username)
-
-    signoff = terms_signoff.get(user=user)
-
-    if request.method == "POST":
-        signoff_form = signoff.forms.get_signoff_form(request.POST)
-        if signoff_form.is_signed_off():
-            signoff.sign(user)
-            return redirect(*next_page)
-        else:
-            messages.error(request, "You must agree to the Terms of Service.")
-
-    return render(request, "registration/terms_of_service.html", {"signoff": signoff})
-
-
-@login_required
-def newsletter_view(request):
-    user = request.user
-
-    signoff = newsletter_signoff.get(user=user)
-
-    if request.method == "POST":
-        signoff_form = signoff.forms.get_signoff_form(request.POST)
-        if signoff_form.is_signed_off():
-            signoff.sign(user)
-            return redirect("newsletter")
-        else:
-            messages.error(request, "You must check the box to sign up for our newsletter.")
-
-    return render(request, "registration/newsletter.html", {"signoff": signoff})
-
-
-@login_required
-def revoke_newsletter_view(request, signet_pk):
-    signoff = get_signoff_or_404(newsletter_signoff, signet_pk)
-    signoff.revoke_if_permitted(
-        user=request.user, reason="I no longer wish to receive the newsletter."
-    )
-
-    return redirect(request.META.get("HTTP_REFERER", "newsletter"))
+    return redirect("article:detail", article.id)

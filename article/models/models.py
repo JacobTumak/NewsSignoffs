@@ -1,19 +1,17 @@
-from django.db import models
 from django.contrib.auth.models import User
+from django.db import models
 
-from signoffs.models import Signet, SignoffField, SignoffSingle, SignoffSet
-from signoffs.signoffs import SimpleSignoff, SignoffRenderer, SignoffUrlsManager
-
-from article.models.signets import LikeSignet
-from article.signoffs import publication_request_signoff, publication_approval_signoff
+from signoffs.models import Signet, SignoffSet, SignoffSingle
+from signoffs.signoffs import SignoffRenderer, SignoffUrlsManager, SimpleSignoff
+from .signets import LikeSignet
+from ..signoffs import publication_approval_signoff, publication_request_signoff
 
 
 class Article(models.Model):
-    PUBLICATION_STATUS_CHOICES = [
-        ("not_requested", "Publication Not Requested"),
-        ("pending", "Publication Pending"),
-        ("approved", "Published"),
-    ]
+    class PublicationStatus(models.TextChoices):
+        NOT_REQUESTED = "not_requested", "Publication Not Requested"
+        PENDING = "pending", "Publication Pending"
+        APPROVED = "approved", "Published"
 
     title = models.CharField(max_length=200, null=False, blank=False)
     author = models.ForeignKey(
@@ -26,7 +24,7 @@ class Article(models.Model):
     publication_approval_signoff = SignoffSingle(publication_approval_signoff)
     publication_status = models.CharField(
         max_length=25,
-        choices=PUBLICATION_STATUS_CHOICES,
+        choices=PublicationStatus.choices,
         default="not_requested",
         null=False,
         blank=False,
@@ -39,14 +37,14 @@ class Article(models.Model):
     )
 
     def update_publication_status(self):
-        status = self.PUBLICATION_STATUS_CHOICES[0][1]
+        status = self.PublicationStatus.NOT_REQUESTED
         # if self.publication_request_signoff:
         if self.publication_request_signoff.has_signed(
             self.author
         ):  # checking if this exists isn't enough since its revokable
-            status = self.PUBLICATION_STATUS_CHOICES[1][1]
+            status = self.PublicationStatus.PENDING
             if self.publication_approval_signoff.exists():
-                status = self.PUBLICATION_STATUS_CHOICES[2][1]
+                status = self.PublicationStatus.APPROVED
         self.publication_status = status
 
     def has_liked(self, user):
@@ -126,5 +124,5 @@ comment_signoff = SimpleSignoff.register(
     signetModel=CommentSignet,
     sigil_label="Posted by",
     render=SignoffRenderer(signet_template="signoffs/comment_signet.html"),
-    urls=SignoffUrlsManager(revoke_url_name="revoke_comment"),
+    urls=SignoffUrlsManager(revoke_url_name="article:revoke_comment"),
 )

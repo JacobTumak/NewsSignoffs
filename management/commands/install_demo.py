@@ -8,3 +8,4 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         management.call_command("migrate")
         management.call_command("create_article_data")
+        management.call_command("create_assignments_data")

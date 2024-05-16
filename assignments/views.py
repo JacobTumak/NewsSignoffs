@@ -12,7 +12,7 @@ from ..registration import permissions
 
 @login_required
 @user_passes_test(permissions.has_signed_terms, login_url="terms_of_service")
-@permission_required("is_staff", login_url="my_assignments", raise_exception="Only staff users may create assignments")
+# @permission_required("is_staff", login_url="my_assignments", raise_exception="Only staff users may create assignments") #TODO: implement perms here
 def create_assignment_view(request):
     if not request.user.is_staff:
         messages.error(
@@ -23,7 +23,6 @@ def create_assignment_view(request):
     if request.method == "POST" and request.user.is_staff:
         form = form(request.POST)
         if form.is_valid():
-            # form.instance.assigned_by = request.user #TODO: adjust form to make this cleaner
             assignment = form.save(commit=False)
             assignment.assigned_by = request.user
             assignment.save()

@@ -51,7 +51,7 @@ class Command(BaseCommand):
         except django.contrib.auth.models.User.DoesNotExist as e:
             error_message = f"""
 {e}
-No default users were found. Please run "python manage.py create_article_data and try again.
+No default users were found. Please run "python manage.py create_article_data" and try again.
 """
             self.stdout.write(self.style.ERROR(error_message))
             sys.exit()

@@ -5,6 +5,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
 from django.urls import reverse
+from django.db.models import Q
 
 from signoffs.shortcuts import get_signet_or_404
 from .forms import ArticleForm, CommentForm
@@ -106,10 +107,13 @@ def delete_article_view(request, article_id):
 # Article List views
 
 
-def base_article_list_view(request, page_title=None, empty_text=None, **filter_kwargs):
+def base_article_list_view(request, page_title=None, empty_text=None, query=None):
+    """
+    query=Q(filter_args)
+    """
     empty_text = empty_text or "Published articles will appear here."
     # filter_kwargs['is_published'] = True
-    articles = Article.objects.filter(**filter_kwargs)
+    articles = Article.objects.filter(query) if query else Article.objects.all()
     context = {"articles": articles, "page_title": page_title, "empty_text": empty_text}
     return render(request, "article/article_list_view.html", context=context)
 
@@ -120,7 +124,7 @@ def my_articles_view(request):
         request,
         page_title="My Articles",
         empty_text="You haven't written any articles yet.",
-        author=request.user,
+        query=Q(author=request.user),
     )
 
 
@@ -138,7 +142,7 @@ def all_liked_articles_view(request):
         request,
         page_title="Liked Articles",
         empty_text="Articles you like will appear here.",
-        like_signatories__user=request.user,
+        query=Q(like_signatories__user=request.user),
     )
 
 

@@ -58,11 +58,11 @@ No default users were found. Please run "python manage.py create_article_data" a
 
         for data in assignments_data:
             args = data.copy()
-            end_at_status = args.pop("status")
+            final_status = args.pop("status")
             assignment = Assignment.objects.create(**args)
 
-            while assignment.status != end_at_status:
-                if signoff := assignment.approval.get_next_signoff(for_user=data['assigned_by']): #TODO: this will only work in python >= 3.8, is that ok?
+            while assignment.status != final_status:
+                if signoff := assignment.approval.get_next_signoff(for_user=data['assigned_by']):
                     signoff.sign(user=data['assigned_by'], commit=True)
                     assignment.bump_status()
                 elif signoff := assignment.approval.get_next_signoff(for_user=data['assigned_to']):

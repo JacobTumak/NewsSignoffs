@@ -1,6 +1,6 @@
 import random
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.core.management.base import BaseCommand
 
 from demo.article.models import Article, Comment
@@ -12,6 +12,8 @@ from demo.article.signoffs import (
 
 class Command(BaseCommand):
     help = "Populate demo data for your app"
+
+    editor_perm = Permission.objects.get(codename='add_assignment')
 
     user_dict = [
         {
@@ -121,6 +123,9 @@ class Command(BaseCommand):
         for data in self.user_dict:
             user, _ = User.objects.get_or_create(**data)
             user.set_password(self.user_password)
+            if user.is_staff:
+                user.user_permissions.add(self.editor_perm)
+                user.save()
             users.append(user)
         User.objects.bulk_update(users, fields=("password",))
         self.stdout.write(self.style.SUCCESS("Demo users populated successfully"))

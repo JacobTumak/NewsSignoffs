@@ -1,10 +1,16 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Permission
 from django.utils.functional import SimpleLazyObject
 
 from signoffs.approvals import ApprovalSignoff, SimpleApproval
+from signoffs.core.signoffs import DefaultSignoffBusinessLogic
 from signoffs.models import ApprovalSignet
 from signoffs.registry import register
 from signoffs.signing_order import SigningOrder
+
+# add_assignment_perm = Permission.objects.get(codename="add_assignment")
+# class AssignmentAssignerApprovalLogic(DefaultSignoffBusinessLogic):
+#     perm = add_assignment_perm
+
 
 
 @register("assignments.approvals.NewAssignmentApproval")
@@ -16,26 +22,25 @@ class NewAssignmentApproval(SimpleApproval):
         signetModel=ApprovalSignet,
         id="assign_project_signoff",
         label="Assign Project",
-        perm="is_staff",
+        logic=DefaultSignoffBusinessLogic(perm="assignments.add_assignment"),
     )
 
     accept_project_signoff = S.register(
         signetModel=ApprovalSignet,
         id="accept_project_signoff",
-        label="Accept Assignment",  # Add perm to check that the user is the assignee?
+        label="Accept Assignment",
     )
 
     submit_completed_signoff = S.register(
         signetModel=ApprovalSignet,
         id="submit_completed_signoff",
-        label="Submit Completed",  # Add perm to check that the user is the assignee?
     )
 
     confirm_completion_signoff = S.register(
         signetModel=ApprovalSignet,
         id="confirm_completion_signoff",
         label="Confirm Completion",
-        perms="is_staff",
+        logic=DefaultSignoffBusinessLogic(perm="assignments.add_assignment"),
     )
 
     signing_order = SigningOrder(
@@ -51,9 +56,17 @@ class NewAssignmentApproval(SimpleApproval):
         if not type(for_user) in (User, SimpleLazyObject):
             raise TypeError(f"var \"for_user\" must be User instance, instead got {type(for_user)}\n")
 
+        queried_signoffs = super().next_signoffs(for_user=for_user)
+
         assignment = self.subject
-        if (for_user == assignment.assigned_by and assignment.status in ['draft', 'pending_review']) or (for_user == assignment.assigned_to and assignment.status in ['requested', 'in_progress']):
-            return super().next_signoffs(for_user=for_user)
-        else:
-            return []
+        if queried_signoffs:
+            next_signoff_type = type(queried_signoffs[0])
+            if (for_user == assignment.assigned_by and next_signoff_type in [self.assign_project_signoff, self.confirm_completion_signoff]) or\
+                    (for_user == assignment.assigned_to and next_signoff_type in [self.accept_project_signoff, self.submit_completed_signoff]):
+                return super().next_signoffs(for_user=for_user)
+        return []
+
+# class AssignmentApprovalBusinessLogic(DefaultApprovalBusinessLogic):
+#     def can_sign(self, approval, user, signoff=None):
+#         return user.has_perm("assignments.can_create_assignment") and super().can_sign(approval, user, signoff)
 

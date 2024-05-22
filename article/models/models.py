@@ -29,8 +29,6 @@ class Article(models.Model):
         null=False,
         blank=False,
     )
-    # is_published = models.BooleanField(default=False)
-    # publish_signoff, publish_signet = SignoffField(publish_article_signoff)
     likes = SignoffSet(
         "like_signoff",
         signet_set_accessor="like_signatories",
@@ -57,8 +55,6 @@ class Article(models.Model):
             return f"{self.author.username} - {self.title}"
 
     def delete(self, *args, **kwargs):
-        # if self.is_published:
-        #     self.publish_signet.delete()  # Delete the signet associated with the article
         super().delete(*args, **kwargs)  # Delete the article itself
 
     def total_likes(self):
@@ -75,22 +71,7 @@ class Article(models.Model):
         else:
             return self.author.username
 
-    # def publish(self, user):
-    #     self.is_published = True
-    #     self.save()
-    #     self.publish_signoff.sign_if_permitted(user)
-    #     if self.publish_signoff.signatory:
-    #         return True
-    #     else:
-    #         return False
-    #
-    # def unpublish(self, user):
-    #     self.is_published = False
-    #     self.save()
-    #     self.publish_signoff.revoke_if_permitted(user)
 
-
-# TODO: move Signets to signets and signoffs to signoffs
 like_signoff = SimpleSignoff.register(
     id="like_signoff",
     signetModel=LikeSignet,
@@ -113,7 +94,6 @@ class Comment(models.Model):
 
 
 class CommentSignet(Signet):
-    # TODO: Replace ForeignKey with SignoffUnique
     comment = models.ForeignKey(
         "Comment", unique=True, on_delete=models.CASCADE, related_name="comment_signet"
     )
